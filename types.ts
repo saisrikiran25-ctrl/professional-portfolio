@@ -2,13 +2,13 @@
 export interface Project {
   id: string;
   title: string;
-  category: 'SAAS' | 'WRAPPER' | 'GPT' | 'CORE';
+  category: 'SAAS' | 'WRAPPER' | 'GPT' | 'AGENT' | 'CORE';
   description: string;
   techStack: string[];
   features?: string[];
   link: string;
   github?: string;
-  status: 'Live' | 'Beta' | 'Concept';
+  status: 'Live' | 'Beta' | 'Concept' | 'Public Repo';
 }
 
 export interface Education {

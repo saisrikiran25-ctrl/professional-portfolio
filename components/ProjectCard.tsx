@@ -105,7 +105,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) => {
           rel="noreferrer"
           className="flex items-center gap-2 font-heading text-xs tracking-[0.18em] uppercase text-white group-hover:text-[var(--accent)] transition-colors link-underline font-semibold"
         >
-          <span>LAUNCH SYSTEM</span>
+          <span>{project.category === 'AGENT' ? 'VIEW REPOSITORY' : 'LAUNCH SYSTEM'}</span>
           <ArrowUpRight size={15} className="text-[var(--accent)] transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </a>
 

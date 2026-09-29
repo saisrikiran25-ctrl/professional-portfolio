@@ -94,6 +94,22 @@ const caseStudies: CaseStudy[] = [
     image: 'https://pitchdeckstorage1234.blob.core.windows.net/ppp/Aletheia',
     link: 'https://saisrikiran25-ctrl.github.io/aletheia-intelligence-terminal/',
     status: 'Beta Preview'
+  },
+  {
+    id: 'case-contentaccel',
+    badge: 'PLATFORM · 06',
+    tag: 'CONTENT ENGINE',
+    title: 'CONTENTACCEL',
+    category: 'Regulated-Industry Content SaaS',
+    quote: '"Brand-voice profiles, structured briefs and per-industry compliance rules combined into an AI content pipeline for regulated teams."',
+    stats: [
+      { label: 'Verticals', value: '7', unit: '+ CUSTOM' },
+      { label: 'Compliance', value: '24', unit: 'RULES' },
+      { label: 'Engine', value: 'GEMINI', unit: 'EDGE FN' }
+    ],
+    image: `${import.meta.env.BASE_URL}covers/contentaccel.svg`,
+    link: 'https://saisrikiran25-ctrl.github.io/content-accelerator/',
+    status: 'Live System'
   }
 ];
 

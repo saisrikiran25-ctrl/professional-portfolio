@@ -31,7 +31,7 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ openCmdK, showToast }) => {
-  const [projectCategory, setProjectCategory] = useState<'ALL' | 'SAAS' | 'WRAPPER' | 'GPT'>('ALL');
+  const [projectCategory, setProjectCategory] = useState<'ALL' | 'SAAS' | 'WRAPPER' | 'GPT' | 'AGENT'>('ALL');
   const [selectedGoal, setSelectedGoal] = useState('SaaS Architecture');
   const [selectedTime, setSelectedTime] = useState('Immediate (This Week)');
   const [activeHeroReel, setActiveHeroReel] = useState(0);
@@ -309,7 +309,7 @@ const Home: React.FC<HomeProps> = ({ openCmdK, showToast }) => {
           <div className="lg:col-span-6">
             <div className="section-marker mb-4"><span>01 — System Curriculum</span></div>
             <h2 className="font-display text-6xl sm:text-7xl lg:text-8xl leading-[0.9] text-white">
-              THREE TRACKS.<br />
+              FOUR TRACKS.<br />
               <span className="text-stroke">ONE STANDARD:</span><br />
               <span className="text-[var(--accent)]">RELENTLESS EXECUTION.</span>
             </h2>
@@ -345,6 +345,12 @@ const Home: React.FC<HomeProps> = ({ openCmdK, showToast }) => {
                 className={`goal-pill ${projectCategory === 'GPT' ? 'active' : ''}`}
               >
                 03 · Custom GPTs ({projects.filter(p => p.category === 'GPT').length})
+              </button>
+              <button
+                onClick={() => setProjectCategory('AGENT')}
+                className={`goal-pill ${projectCategory === 'AGENT' ? 'active' : ''}`}
+              >
+                04 · AI Agents ({projects.filter(p => p.category === 'AGENT').length})
               </button>
             </div>
           </div>

@@ -47,70 +47,71 @@ export const projects: Project[] = [
     link: 'https://saisrikiran25-ctrl.github.io/aletheia-intelligence-terminal/',
     status: 'Beta'
   },
-  
+
+  {
+    id: 'contentaccel',
+    title: 'ContentAccel',
+    category: 'SAAS',
+    description: 'AI content-generation platform built for regulated industries. Combines brand-voice profiles, structured content briefs and per-industry compliance rules to draft on-brand content, with a content library and calendar.',
+    techStack: ['React', 'Supabase', 'Gemini', 'Tailwind'],
+    features: [
+      'Brand Voice',
+      'Content Briefs',
+      'Compliance Rules',
+      'Content Calendar'
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/content-accelerator/',
+    status: 'Live'
+  },
+
   // SECTION B: WRAPPERS
   {
-    id: 'finance-go',
-    title: 'FinanceGO',
+    id: 'portfolio-forge',
+    title: 'PortfolioForge',
     category: 'WRAPPER',
-    description: 'FMCG-focused financial analytics with linear regression forecasting. Ingests CSVs to visualize EBITDA, margins, and solvency in real-time.',
-    techStack: ['Lovable', 'Linear Regression', 'Chart.js'],
+    description: 'AI portfolio generator. Paste in resume data and it produces a complete, deployable personal portfolio website as three files, plus a step-by-step guide to publish it on GitHub Pages.',
+    techStack: ['React', 'TypeScript', 'Gemini API'],
     features: [
-      'Linear Forecast',
-      'EBITDA Viz',
-      'CSV Ingestion',
-      'Trend Analysis'
+      'Resume to Site',
+      'Live Preview',
+      'Deployable Files',
+      'Publishing Guide'
     ],
-    link: 'https://financego.lovable.app/',
+    link: 'https://saisrikiran25-ctrl.github.io/portfolio-forge/',
     status: 'Live'
   },
   {
-    id: 'advantage-ai',
-    title: 'AdVantage AI',
+    id: 'promptboss',
+    title: 'PromptBoss',
     category: 'WRAPPER',
-    description: 'AI-driven Brand and Strategy Assistant. Generates headlines, slogans, and SEO keywords based on brand voice and product details.',
-    techStack: ['React', 'Gemini API', 'Tailwind'],
+    description: 'AI prompt refinement tool. Diagnoses a prompt, identifies what is missing, and rebuilds it for the chosen task type, output style, tone and target model.',
+    techStack: ['React', 'Zustand', 'Framer Motion', 'Gemini API'],
     features: [
-      'Brand Strategy',
-      'Slogan Gen',
-      'SEO Keywords',
-      'Voice Matching'
+      'Prompt Diagnosis',
+      '12 Task Types',
+      'Model Targeting',
+      'Streaming Output'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/advantage-ai/',
+    link: 'https://saisrikiran25-ctrl.github.io/promptboss/',
     status: 'Live'
   },
   {
-    id: 'academic-scheduler',
-    title: 'Academic Schedule Generator',
+    id: 'lexis',
+    title: 'LEXIS',
     category: 'WRAPPER',
-    description: 'Algorithmic timetable optimization system. Automatically resolves conflicts between faculty availability, course requirements, and student preferences.',
-    techStack: ['React', 'Constraint Solver', 'Algorithms'],
+    description: 'Plain-language analyzer for Terms & Conditions and privacy policies. Classifies each clause by risk, scores the whole document, and explains what it means for you in Consumer or Founder mode.',
+    techStack: ['React', 'OpenRouter', 'Gemini 2.5 Flash'],
     features: [
-      'Conflict Guard',
-      'Auto-Timetable',
-      'Faculty Sync',
-      'Smart Allocation'
+      'Clause Risk Levels',
+      'Risk Score',
+      'Consumer Mode',
+      'Founder Mode'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/academic-schedule-planner/',
+    link: 'https://saisrikiran25-ctrl.github.io/lexis-policy-analyzer/',
     status: 'Live'
   },
 
   // SECTION C: CUSTOM GPTs
-  {
-    id: 'ultra-prompt',
-    title: 'Ultra Prompt Image Lab',
-    category: 'GPT',
-    description: 'Generates fast, repeatable 4K image prompts with lens/lighting specs and artifact avoidance.',
-    techStack: ['DALL-E 3', 'Prompt Eng'],
-    features: [
-      '4K Prompts',
-      'Lens Config',
-      'Lighting Specs',
-      'Clean Output'
-    ],
-    link: 'https://chatgpt.com/g/g-69388f6973fc8191a20db897ca74be68-ultraprompt-im',
-    status: 'Live'
-  },
   {
     id: 'build-pilot',
     title: 'BuildPilot',
@@ -140,6 +141,53 @@ export const projects: Project[] = [
     ],
     link: 'https://chatgpt.com/g/g-69510e4323f48191b0a9b6e00c68ffde-atlas-institution',
     status: 'Live'
+  },
+
+  // SECTION D: AI AGENTS (public repositories)
+  {
+    id: 'smb-agent-os',
+    title: 'SMB-Agent-OS',
+    category: 'AGENT',
+    description: 'Multi-tenant, human-supervised AI operating system for Indian SMBs. A lead-qualification agent reads multilingual messages and drafts WhatsApp follow-ups, and nothing is sent until the owner approves it.',
+    techStack: ['Node.js', 'Express', 'React', 'PostgreSQL', 'Zod'],
+    features: [
+      '9 Languages',
+      'Approval Gate',
+      'Knowledge Hub (RAG)',
+      'Audit Trail'
+    ],
+    link: 'https://github.com/saisrikiran25-ctrl/smb-agent-os',
+    status: 'Public Repo'
+  },
+  {
+    id: 'contract-review-intake',
+    title: 'Contract Review Intake',
+    category: 'AGENT',
+    description: 'n8n automation that ingests legal, financial and operational documents, validates metadata, classifies and extracts structured fields with an LLM, flags risks, and routes each item by priority with human approval tracking.',
+    techStack: ['n8n', 'LLM', 'JSON Schema', 'Slack'],
+    features: [
+      'Doc Classification',
+      'Structured Extraction',
+      'Priority Routing',
+      'Human Approval'
+    ],
+    link: 'https://github.com/saisrikiran25-ctrl/contract-document-review-intake',
+    status: 'Public Repo'
+  },
+  {
+    id: 'invoice-exception-router',
+    title: 'Invoice Exception Router',
+    category: 'AGENT',
+    description: 'AI-assisted accounts-payable automation on n8n. Detects invoice issues before payment, classifies each by exception type, diagnoses the root cause, and routes it to the right owner with the evidence required.',
+    techStack: ['n8n', 'LLM', 'AP Automation'],
+    features: [
+      'Classify',
+      'Diagnose',
+      'Assign Owner',
+      'Evidence Checklist'
+    ],
+    link: 'https://github.com/saisrikiran25-ctrl/invoice-exception-router',
+    status: 'Public Repo'
   }
 ];
 
