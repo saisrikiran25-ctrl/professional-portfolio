@@ -28,7 +28,7 @@ const caseStudies: CaseStudy[] = [
       { label: 'State', value: '100', unit: '% PERSIST' }
     ],
     image: 'https://pitchdeckstorage1234.blob.core.windows.net/ppp/Synthetix',
-    link: 'https://saisrikiran25-ctrl.github.io/synthetix/',
+    link: 'https://saisrikiran25-ctrl.github.io/synthetix-ai-app/',
     status: 'Live System'
   },
   {
@@ -76,7 +76,7 @@ const caseStudies: CaseStudy[] = [
       { label: 'Speed', value: 'INSTANT', unit: 'DL' }
     ],
     image: 'https://pitchdeckstorage1234.blob.core.windows.net/ppp/PFPrompts',
-    link: 'https://saisrikiran25-ctrl.github.io/PromptFoundry/#/',
+    link: 'https://saisrikiran25-ctrl.github.io/prompt-foundry/#/',
     status: 'Live System'
   },
   {
@@ -92,7 +92,7 @@ const caseStudies: CaseStudy[] = [
       { label: 'Status', value: 'BETA', unit: 'ACTIVE' }
     ],
     image: 'https://pitchdeckstorage1234.blob.core.windows.net/ppp/Aletheia',
-    link: 'https://saisrikiran25-ctrl.github.io/Aletheia/',
+    link: 'https://saisrikiran25-ctrl.github.io/aletheia-intelligence-terminal/',
     status: 'Beta Preview'
   }
 ];
