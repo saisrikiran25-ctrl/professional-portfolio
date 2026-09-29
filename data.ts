@@ -35,7 +35,7 @@ export const projects: Project[] = [
   {
     id: 'aletheia',
     title: 'Aletheia',
-    category: 'SAAS',
+    category: 'WRAPPER',
     description: 'The "Zero-to-One" Intelligence Terminal for founders. Features "Consensus Map", "Dialectic Engine", and "Monopoly Discovery Pane" to identify market blindspots.',
     techStack: ['Python', 'TensorFlow', 'React', 'D3.js'],
     features: [
@@ -68,7 +68,7 @@ export const projects: Project[] = [
   {
     id: 'portfolio-forge',
     title: 'PortfolioForge',
-    category: 'WRAPPER',
+    category: 'SAAS',
     description: 'AI portfolio generator. Paste in resume data and it produces a complete, deployable personal portfolio website as three files, plus a step-by-step guide to publish it on GitHub Pages.',
     techStack: ['React', 'TypeScript', 'Gemini API'],
     features: [
