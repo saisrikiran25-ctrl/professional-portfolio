@@ -64,36 +64,36 @@ const caseStudies: CaseStudy[] = [
     status: 'Editorial Release'
   },
   {
-    id: 'case-promptfoundry',
-    badge: 'COMMERCE · 04',
-    tag: 'MARKETPLACE',
-    title: 'PROMPT FOUNDRY',
-    category: 'AI Prompt Storefront',
-    quote: '"Premium e-commerce platform for expert-grade prompts, combining Amazon-grade discovery with boutique prompt specialization and instant checkout."',
+    id: 'case-portfolioforge',
+    badge: 'BUILDER · 04',
+    tag: 'SITE GENERATOR',
+    title: 'PORTFOLIO FORGE',
+    category: 'AI Portfolio Generator',
+    quote: '"Paste in resume data and get a complete, deployable personal portfolio website as three files, plus a step-by-step guide to publish it on GitHub Pages."',
     stats: [
-      { label: 'Prompts', value: '600', unit: '+' },
-      { label: 'Payments', value: 'UPI', unit: '+ STRIPE' },
-      { label: 'Speed', value: 'INSTANT', unit: 'DL' }
+      { label: 'Output', value: '3', unit: 'FILES' },
+      { label: 'Preview', value: 'LIVE', unit: 'EDITOR' },
+      { label: 'Deploy', value: 'GITHUB', unit: 'PAGES' }
     ],
-    image: 'https://pitchdeckstorage1234.blob.core.windows.net/ppp/PFPrompts',
-    link: 'https://saisrikiran25-ctrl.github.io/prompt-foundry/#/',
+    image: 'https://pitchdeckstorage1234.blob.core.windows.net/logo/123',
+    link: 'https://saisrikiran25-ctrl.github.io/portfolio-forge/',
     status: 'Live System'
   },
   {
-    id: 'case-aletheia',
-    badge: 'INTELLIGENCE · 05',
-    tag: 'TERMINAL',
-    title: 'ALETHEIA',
-    category: 'Zero-to-One Founder Suite',
-    quote: '"Terminal identifying market blindspots via Dialectic Engine, Consensus Map, and Monopoly Discovery Pane for decisive founder insights."',
+    id: 'case-lexis',
+    badge: 'LEGAL · 05',
+    tag: 'POLICY ANALYZER',
+    title: 'LEXIS',
+    category: 'Terms & Privacy Analyzer',
+    quote: '"Plain-language analyzer for Terms & Conditions and privacy policies that classifies each clause by risk and explains what it means for you."',
     stats: [
-      { label: 'Insights', value: 'ZERO', unit: '-TO-1' },
-      { label: 'Math', value: 'D3', unit: 'DIALECTIC' },
-      { label: 'Status', value: 'BETA', unit: 'ACTIVE' }
+      { label: 'Clauses', value: 'RISK', unit: 'GRADED' },
+      { label: 'Score', value: 'DOC', unit: 'LEVEL' },
+      { label: 'Modes', value: '2', unit: 'CONSUMER/FOUNDER' }
     ],
-    image: 'https://pitchdeckstorage1234.blob.core.windows.net/ppp/Aletheia',
-    link: 'https://saisrikiran25-ctrl.github.io/aletheia-intelligence-terminal/',
-    status: 'Beta Preview'
+    image: 'https://pitchdeckstorage1234.blob.core.windows.net/logo/345',
+    link: 'https://saisrikiran25-ctrl.github.io/lexis-policy-analyzer/',
+    status: 'Live System'
   },
   {
     id: 'case-contentaccel',
