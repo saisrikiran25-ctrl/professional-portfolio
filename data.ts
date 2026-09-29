@@ -223,13 +223,13 @@ export const certifications: Certification[] = [
     title: 'Generative AI Mastermind',
     issuer: 'Outskill',
     date: 'Issued Aug 2025',
-    link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/CertificateOfCompletion_Integrating%20Generative%20AI%20into%20Business%20Strategy%20(4).pdf'
+    link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/genai_compressed.pdf'
   },
   {
     title: 'Integrating Generative AI into Business Strategy',
     issuer: 'Society of Human Resource Management',
     date: 'Issued Oct 2025',
-    link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/genai_compressed.pdf'
+    link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/Certificate_Of_Completion_Integrating_Generative_AI_Into_Business_Strategy.pdf'
   }
 ];
 
