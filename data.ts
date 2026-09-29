@@ -6,7 +6,7 @@ export const projects: Project[] = [
     id: 'synthetix',
     title: 'Synthetix',
     category: 'SAAS',
-    description: 'Elite browser-native Visual Logic Engine with an "Obsidian Midnight" aesthetic. Orchestrates complex data flows via kinetic, type-aware connections on an infinite canvas with zero-latency reactive propagation.',
+    description: 'Elite browser-native Visual Logic Engine with an "Obsidian Midnight" aesthetic. Orchestrates complex data flows via kinetic, type-aware connections on an infinite canvas with zero lock-in.',
     techStack: ['React', 'Canvas API', 'DAG Logic', 'Local Storage'],
     features: [
       'Infinite Canvas',
@@ -14,7 +14,7 @@ export const projects: Project[] = [
       'Reactive Engine',
       'Auto-Persistence'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/synthetix/',
+    link: 'https://saisrikiran25-ctrl.github.io/synthetix-ai-app/',
     status: 'Live'
   },
   {
@@ -29,7 +29,7 @@ export const projects: Project[] = [
       'Workflow Assistance',
       'Cloud Storage'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/PromptFoundry/#/',
+    link: 'https://saisrikiran25-ctrl.github.io/prompt-foundry/',
     status: 'Live'
   },
   {
@@ -44,7 +44,7 @@ export const projects: Project[] = [
       'Market Blindspots',
       'Interactive Interface'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/Aletheia/',
+    link: 'https://saisrikiran25-ctrl.github.io/aletheia-intelligence-terminal/',
     status: 'Beta'
   },
   
@@ -76,7 +76,7 @@ export const projects: Project[] = [
       'SEO Keywords',
       'Voice Matching'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/AdvantageAI/',
+    link: 'https://saisrikiran25-ctrl.github.io/advantage-ai/',
     status: 'Live'
   },
   {
@@ -91,7 +91,7 @@ export const projects: Project[] = [
       'Faculty Sync',
       'Smart Allocation'
     ],
-    link: 'https://saisrikiran25-ctrl.github.io/Planner/',
+    link: 'https://saisrikiran25-ctrl.github.io/academic-schedule-planner/',
     status: 'Live'
   },
 
