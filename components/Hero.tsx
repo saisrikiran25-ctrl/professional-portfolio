@@ -152,32 +152,6 @@ function paintRing(
   ctx.fillStyle = halo;
   ctx.fillRect(0, 0, w, h);
 
-  // outer orbit: a slowly rotating dashed ring with two satellites
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(still ? 0 : t * 0.04);
-  ctx.setLineDash([1.5, 11]);
-  ctx.strokeStyle = `rgba(255,255,255,${0.34 * ie})`;
-  ctx.lineWidth = 1.4;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(0, 0, R * 1.17, 0, TAU);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.restore();
-  if (!still) {
-    for (let s = 0; s < 2; s++) {
-      const sa = t * 0.32 + s * Math.PI;
-      ctx.fillStyle = s ? 'rgba(255,255,255,0.8)' : '#fb5e28';
-      ctx.shadowColor = s ? 'rgba(255,255,255,0.6)' : 'rgba(251,94,40,0.9)';
-      ctx.shadowBlur = 10;
-      ctx.beginPath();
-      ctx.arc(cx + Math.cos(sa) * R * 1.17, cy + Math.sin(sa) * R * 1.17, (s ? 2 : 3) * ie, 0, TAU);
-      ctx.fill();
-    }
-    ctx.shadowBlur = 0;
-  }
-
   // inner hairline ring and degree marks
   ctx.strokeStyle = `rgba(255,255,255,${0.1 * ie})`;
   ctx.lineWidth = 1;
