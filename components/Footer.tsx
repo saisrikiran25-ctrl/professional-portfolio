@@ -105,6 +105,8 @@ const Footer: React.FC = () => {
               <li><a href="#origins">IIFT Integrated</a></li>
               <li><a href="#credentials">GenAI Mastermind</a></li>
               <li><a href="#credentials">SHRM GenAI Cert</a></li>
+              <li><a href="#credentials">GenAI for Marketing</a></li>
+              <li><a href="#credentials">Azure Essentials</a></li>
             </ul>
           </div>
 

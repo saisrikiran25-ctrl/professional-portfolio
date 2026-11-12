@@ -230,6 +230,18 @@ export const certifications: Certification[] = [
     issuer: 'Society of Human Resource Management',
     date: 'Issued Oct 2025',
     link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/Certificate_Of_Completion_Integrating_Generative_AI_Into_Business_Strategy.pdf'
+  },
+  {
+    title: 'Generative AI for Marketing',
+    issuer: 'American Marketing Association · LinkedIn Learning',
+    date: 'Issued Oct 2026',
+    link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/CertificateOfCompletion_AMA.pdf'
+  },
+  {
+    title: 'Microsoft Azure Essentials',
+    issuer: 'Microsoft & LinkedIn · LinkedIn Learning',
+    date: 'Issued Oct 2026',
+    link: 'https://pitchdeckstorage1234.blob.core.windows.net/certificates/CertificateOfCompletion_Microsoft-Azure.pdf'
   }
 ];
 
