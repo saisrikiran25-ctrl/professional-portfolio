@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FEATURED, ITEM_BY_ID, KIND_LABEL, SECTION_ART } from '../lib/items';
+import { FEATURED, ITEMS, ITEM_BY_ID, KIND_LABEL, SECTION_ART } from '../lib/items';
 import { warpTo } from '../lib/warp';
 import { createCorridor, CORRIDOR_TRAVEL, Corridor, RGB } from '../lib/scene';
 import { sound } from '../lib/audio';
@@ -19,25 +19,33 @@ interface DialSector {
   href: string;
   art: string;
   track?: number;
+  /** shown in the centre while the sector is hovered */
+  cap: string;
 }
 
+const count = (kind: string) => ITEMS.filter((i) => i.kind === kind).length;
+
 const DIAL: DialSector[] = [
-  { label: 'SaaS', href: '#work', art: 'synthetix', track: 0 },
-  { label: 'Wrappers', href: '#work', art: 'aletheia', track: 1 },
-  { label: 'GPTs', href: '#work', art: 'build-pilot', track: 2 },
-  { label: 'Agents', href: '#work', art: 'smb-agent-os', track: 3 },
-  { label: 'Ventures', href: '#work', art: 'venture-1', track: 4 },
-  { label: 'Telemetry', href: '#telemetry', art: 'case-synthetix' },
-  { label: 'Origins', href: '#origins', art: 'sec-origins' },
-  { label: 'Accreditations', href: '#credentials', art: 'sec-creds' },
+  { label: 'SaaS', href: '#work', art: 'synthetix', track: 0, cap: `SaaS Powerhouse · ${count('SAAS')} systems` },
+  { label: 'Wrappers', href: '#work', art: 'aletheia', track: 1, cap: `AI Wrappers & Tools · ${count('WRAPPER')} systems` },
+  { label: 'GPTs', href: '#work', art: 'build-pilot', track: 2, cap: `Custom GPTs · ${count('GPT')} systems` },
+  { label: 'Agents', href: '#work', art: 'smb-agent-os', track: 3, cap: `AI Agents · ${count('AGENT')} systems` },
+  { label: 'Ventures', href: '#work', art: 'venture-1', track: 4, cap: `Startup Ventures · ${count('VENTURE')} ventures` },
+  { label: 'Telemetry', href: '#telemetry', art: 'case-synthetix', cap: `System Telemetry · ${count('CASE')} case studies` },
+  { label: 'Origins', href: '#origins', art: 'sec-origins', cap: 'Academic Foundations' },
+  { label: 'Accreditations', href: '#credentials', art: 'sec-creds', cap: 'Verified Accreditations' },
 ];
+
+const colorOf = (id: string): [number, number, number] =>
+  (ITEM_BY_ID.get(id)?.color ?? SECTION_ART.find((s) => s.id === id)?.color ?? [251, 94, 40]) as [number, number, number];
 
 const N = FEATURED.length;
 const TICKS = 160;
 const REEL_START = 0.07;
 const toRGB = (c: [number, number, number]): RGB => [c[0], c[1], c[2]];
 
-/** Everything on the dial that only changes on hover / tune — painted rarely. */
+/** Everything on the dial that only changes on hover / tune — painted rarely.
+ *  Transparent on purpose: the live corridor shows through behind it. */
 function paintBackdrop(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -45,71 +53,75 @@ function paintBackdrop(
   dpr: number,
   R: number,
   hovered: number,
-  tuneK: number,
-  arts: (HTMLCanvasElement | undefined)[]
+  hoverColor: RGB | null
 ) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = '#090c12';
-  ctx.fillRect(0, 0, w, h);
+  ctx.clearRect(0, 0, w, h);
   const cx = w / 2;
   const cy = h / 2;
   const far = Math.hypot(w, h);
   const P = (a: number, r: number) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as const;
   const wedge = (Math.PI * 2) / DIAL.length;
 
-  for (let i = 0; i < DIAL.length; i++) {
-    const ac = i * wedge - Math.PI / 2;
+  // the hovered sector washes in its own colour
+  if (hovered >= 0 && hoverColor) {
+    const ac = hovered * wedge - Math.PI / 2;
     const a0 = ac - wedge / 2;
     const a1 = ac + wedge / 2;
-    const art = arts[i];
+    const [r, g, b] = hoverColor;
+    const [mx, my] = P(ac, R * 1.5);
+    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, R * 1.4);
+    grad.addColorStop(0, `rgba(${r | 0},${g | 0},${b | 0},0.34)`);
+    grad.addColorStop(1, `rgba(${r | 0},${g | 0},${b | 0},0)`);
     ctx.save();
     ctx.beginPath();
-    const [x0, y0] = P(a0, R * 1.06);
+    const [x0, y0] = P(a0, R * 1.04);
     ctx.moveTo(x0, y0);
     const [x1, y1] = P(a0, far);
     ctx.lineTo(x1, y1);
     ctx.arc(cx, cy, far, a0, a1);
-    const [x2, y2] = P(a1, R * 1.06);
+    const [x2, y2] = P(a1, R * 1.04);
     ctx.lineTo(x2, y2);
-    ctx.arc(cx, cy, R * 1.06, a1, a0, true);
+    ctx.arc(cx, cy, R * 1.04, a1, a0, true);
     ctx.closePath();
     ctx.clip();
-    if (art) {
-      const iw = Math.max(R * 1.55, 240);
-      const ih = (iw * art.height) / art.width;
-      const [px, py] = P(ac, R * 1.5);
-      ctx.globalAlpha = 0.27 + 0.3 * tuneK + (hovered === i ? 0.3 : 0);
-      ctx.drawImage(art, px - iw / 2, py - ih / 2, iw, ih);
-    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
     ctx.restore();
+  }
 
+  // spokes
+  for (let i = 0; i < DIAL.length; i++) {
+    const a0 = i * wedge - Math.PI / 2 - wedge / 2;
     const hot = hovered === i || hovered === (i + 1) % DIAL.length;
-    ctx.strokeStyle = hot ? 'rgba(251,94,40,0.5)' : 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = hot ? 'rgba(251,94,40,0.55)' : 'rgba(255,255,255,0.09)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    const [sx, sy] = P(a0, R * 1.06);
+    const [sx, sy] = P(a0, R * 1.04);
     ctx.moveTo(sx, sy);
     const [ex, ey] = P(a0, far);
     ctx.lineTo(ex, ey);
     ctx.stroke();
   }
 
-  const g = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.55);
-  g.addColorStop(0, 'rgba(9,12,18,0.97)');
-  g.addColorStop(1, 'rgba(9,12,18,0)');
+  // keep the middle readable over the moving scene
+  const g = ctx.createRadialGradient(cx, cy, R * 0.45, cx, cy, R * 1.12);
+  g.addColorStop(0, 'rgba(8,11,17,0.86)');
+  g.addColorStop(0.7, 'rgba(8,11,17,0.62)');
+  g.addColorStop(1, 'rgba(8,11,17,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
   ctx.lineWidth = 1;
-  for (const k of [1.3, 1.7]) {
+  for (const k of [1.32, 1.72]) {
     ctx.beginPath();
     ctx.arc(cx, cy, R * k, 0, Math.PI * 2);
     ctx.stroke();
   }
 }
 
-/** The part that moves every frame: a living tick ring. Idle it breathes and a scanner
+/** The part that moves every frame: a living instrument ring. Idle it breathes and a scanner
  *  sweeps round it; tuned, it becomes a full orange waveform. */
 function paintRing(
   ctx: CanvasRenderingContext2D,
@@ -140,6 +152,50 @@ function paintRing(
   ctx.fillStyle = halo;
   ctx.fillRect(0, 0, w, h);
 
+  // outer orbit: a slowly rotating dashed ring with two satellites
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(still ? 0 : t * 0.04);
+  ctx.setLineDash([1.5, 11]);
+  ctx.strokeStyle = `rgba(255,255,255,${0.34 * ie})`;
+  ctx.lineWidth = 1.4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 1.17, 0, TAU);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  if (!still) {
+    for (let s = 0; s < 2; s++) {
+      const sa = t * 0.32 + s * Math.PI;
+      ctx.fillStyle = s ? 'rgba(255,255,255,0.8)' : '#fb5e28';
+      ctx.shadowColor = s ? 'rgba(255,255,255,0.6)' : 'rgba(251,94,40,0.9)';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(sa) * R * 1.17, cy + Math.sin(sa) * R * 1.17, (s ? 2 : 3) * ie, 0, TAU);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // inner hairline ring and degree marks
+  ctx.strokeStyle = `rgba(255,255,255,${0.1 * ie})`;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.9, 0, TAU);
+  ctx.stroke();
+  if (R > 150) {
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `600 ${Math.max(8, R * 0.034)}px "Hanken Grotesk Variable", system-ui, sans-serif`;
+    for (let i = 0; i < DIAL.length; i++) {
+      const a = (i / DIAL.length) * TAU - Math.PI / 2;
+      const on = hovered === i;
+      ctx.fillStyle = on ? `rgba(251,94,40,${ie})` : `rgba(255,255,255,${0.3 * ie})`;
+      ctx.fillText(String(Math.round((i * 360) / DIAL.length)).padStart(3, '0'), cx + Math.cos(a) * (R * 0.9 - 14), cy + Math.sin(a) * (R * 0.9 - 14));
+    }
+  }
+
   // light motes drifting outward from the ring
   if (!still) {
     for (let m = 0; m < 48; m++) {
@@ -168,7 +224,7 @@ function paintRing(
     const idle = Math.sin(t * 1.8 + j * 0.35) * 0.5 + 0.5;
     let len = (major ? 13 : 6) + (1.2 + idle * 3.2) * (1 - tuneK) + sw * 10;
     let alpha = major ? 0.8 : 0.3;
-    let kk = Math.max(tuneK, sw * 0.95);
+    const kk = Math.max(tuneK, sw * 0.95);
     if (tuneK > 0.01) {
       const w1 = Math.sin(t * 2.2 + j * 0.43) * 0.5 + 0.5;
       const w2 = Math.sin(t * 3.1 - j * 0.17) * 0.5 + 0.5;
@@ -217,6 +273,7 @@ const Hero: React.FC = () => {
   const floatRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const dialUiRef = useRef<HTMLDivElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
   const corridorRef = useRef<Corridor | null>(null);
   const frontRef = useRef(0);
 
@@ -305,7 +362,8 @@ const Hero: React.FC = () => {
 
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { rootMargin: '10% 0px' });
     io.observe(section);
-    const arts = DIAL.map((d) => assets.arts.get(d.art));
+    const dialColors = DIAL.map((d) => toRGB(colorOf(d.art)));
+    let dialShown: RGB = dialColors[0];
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
@@ -344,6 +402,22 @@ const Hero: React.FC = () => {
       const m = mixV * mixV * (3 - 2 * mixV);
       shown = [lerp(tintFrom[0], tintTo[0], m), lerp(tintFrom[1], tintTo[1], m), lerp(tintFrom[2], tintTo[2], m)];
 
+      // before the dive the corridor is tinted by the hovered sector, else it cycles through them
+      let want: RGB;
+      if (L.hovered >= 0) want = dialColors[L.hovered];
+      else {
+        const cyc = time / 3.4;
+        const ia = Math.floor(cyc) % dialColors.length;
+        const ib = (ia + 1) % dialColors.length;
+        const f = cyc - Math.floor(cyc);
+        const sf = f * f * (3 - 2 * f);
+        want = [lerp(dialColors[ia][0], dialColors[ib][0], sf), lerp(dialColors[ia][1], dialColors[ib][1], sf), lerp(dialColors[ia][2], dialColors[ib][2], sf)];
+      }
+      const kT = 1 - Math.exp(-dt * 2.4);
+      dialShown = [lerp(dialShown[0], want[0], kT), lerp(dialShown[1], want[1], kT), lerp(dialShown[2], want[2], kT)];
+      const tintNow: RGB =
+        dialK < 1 ? [lerp(dialShown[0], shown[0], dialK), lerp(dialShown[1], shown[1], dialK), lerp(dialShown[2], shown[2], dialK)] : shown;
+
       L.tuneK = lerp(L.tuneK, L.tuned ? 1 : 0, 1 - Math.exp(-dt * 2.6));
       // pointer parallax, smoothed
       L.lx = lerp(L.lx, L.tx, 1 - Math.exp(-dt * 3.2));
@@ -351,7 +425,8 @@ const Hero: React.FC = () => {
 
       const reelK = smooth(0.05, 0.14, p);
       const stage = stageRef.current;
-      if (stage) stage.style.setProperty('--tint', `${shown[0] | 0},${shown[1] | 0},${shown[2] | 0}`);
+      if (stage) stage.style.setProperty('--tint', `${tintNow[0] | 0},${tintNow[1] | 0},${tintNow[2] | 0}`);
+      if (veilRef.current) veilRef.current.style.opacity = String(1 - dialK);
       if (dialUiRef.current) {
         const o = 1 - dialK;
         dialUiRef.current.style.opacity = String(o);
@@ -366,8 +441,10 @@ const Hero: React.FC = () => {
 
       // corridor
       if (corridorRef.current) {
-        const z = reduced ? ((idx + 0.5) / N) * CORRIDOR_TRAVEL : rp * CORRIDOR_TRAVEL;
-        corridorRef.current.render(z, reduced ? 0 : time, shown, shown, 0, reduced ? 0 : L.lx, reduced ? 0 : L.ly);
+        const z = reduced
+          ? ((idx + 0.5) / N) * CORRIDOR_TRAVEL
+          : rp * CORRIDOR_TRAVEL + (1 - dialK) * (1.2 + 1.2 * Math.sin(time * 0.2));
+        corridorRef.current.render(z, reduced ? 0 : time, tintNow, tintNow, 0, reduced ? 0 : L.lx, reduced ? 0 : L.ly);
       }
 
       // reel card: gentle breathing + tilt toward the pointer
@@ -380,18 +457,18 @@ const Hero: React.FC = () => {
       const dc = dialRef.current;
       if (dialK < 0.995 && dc && L.w) {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const q = Math.round(L.tuneK * 20);
-        const key = `${L.w}x${L.h}x${dpr}x${L.R}x${L.hovered}x${q}`;
+        const key = `${L.w}x${L.h}x${dpr}x${L.R}x${L.hovered}`;
         if (key !== bgKey) {
           bgKey = key;
           offscreen.width = dc.width;
           offscreen.height = dc.height;
-          paintBackdrop(octx, L.w, L.h, dpr, L.R, L.hovered, q / 20, arts);
+          paintBackdrop(octx, L.w, L.h, dpr, L.R, L.hovered, L.hovered >= 0 ? dialColors[L.hovered] : null);
         }
         const ctx = dc.getContext('2d');
         if (ctx) {
           smoothLevel = lerp(smoothLevel, sound.level(), 0.2);
           ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, dc.width, dc.height);
           ctx.drawImage(offscreen, 0, 0);
           paintRing(ctx, L.w, L.h, dpr, L.R, reduced ? 0 : time, L.hovered, smoothLevel, L.tuneK, reduced);
         }
@@ -453,7 +530,7 @@ const Hero: React.FC = () => {
 
   const goto = useCallback((d: DialSector, x: number, y: number) => {
     sound.thock(0.6);
-    const color = (ITEM_BY_ID.get(d.art)?.color ?? SECTION_ART.find((s) => s.id === d.art)?.color ?? [251, 94, 40]) as [number, number, number];
+    const color = colorOf(d.art);
     // an iris warp instead of scrolling through everything in between
     warpTo({
       label: d.label,
@@ -489,10 +566,34 @@ const Hero: React.FC = () => {
       <div className="hero__stage" ref={stageRef} onPointerMove={onMove} onClick={onStageClick} style={{ ['--tint' as string]: glow }}>
         <div className={`hero__fallback ${noGL ? 'is-on' : ''}`} />
         <canvas ref={glRef} className="hero__gl" aria-hidden="true" />
+        <div className="hero__veil" ref={veilRef} aria-hidden="true" />
         <div className="hero__vignette" aria-hidden="true" />
         <canvas ref={dialRef} className="hero__dial" aria-hidden="true" />
 
         <div className="dial" ref={dialUiRef} style={{ ['--R' as string]: `${R}px` }}>
+          {/* instrument frame */}
+          <div className="hud">
+            <div className="hud__frame" />
+            <i className="hud__x hud__x--tl" />
+            <i className="hud__x hud__x--tr" />
+            <i className="hud__x hud__x--bl" />
+            <i className="hud__x hud__x--br" />
+            <div className="hud__tl">
+              <b>EST. 2026</b>
+              <span>MUMBAI &amp; KAKINADA</span>
+            </div>
+            <div className="hud__tr">
+              <b>
+                <span className="ping" aria-hidden="true" /> OPEN TO PROJECTS
+              </b>
+              <span>IIMB · IIFT</span>
+            </div>
+            <div className="hud__br">
+              <span>SCROLL TO ENTER</span>
+              <i className="hud__line" aria-hidden="true" />
+            </div>
+          </div>
+
           <div className="dial__core">
             <button
               type="button"
@@ -503,14 +604,23 @@ const Hero: React.FC = () => {
               }}
               disabled={tuned}
             >
+              <i aria-hidden="true" />
               {tuned ? (soundOn ? 'Tuned in' : 'Silent mode') : 'Click to tune in'}
             </button>
             <h1 className="dial__name">
               Sai <strong>Srikiran J</strong>
             </h1>
             <p className="dial__sub">Student AI Architect &amp; Aspiring Entrepreneur</p>
-            <p className="dial__meta">EST. 2026 · MUMBAI &amp; KAKINADA</p>
-            {!tuned ? (
+            <p className="dial__cap" key={hot}>
+              {hot >= 0 ? (
+                <>
+                  <b>{String(hot + 1).padStart(2, '0')}</b> {DIAL[hot].cap}
+                </>
+              ) : (
+                'Choose a signal'
+              )}
+            </p>
+            {!tuned && (
               <button
                 type="button"
                 className="dial__quiet"
@@ -521,8 +631,6 @@ const Hero: React.FC = () => {
               >
                 continue without sound
               </button>
-            ) : (
-              <p className="dial__hint">Scroll to enter</p>
             )}
           </div>
 
