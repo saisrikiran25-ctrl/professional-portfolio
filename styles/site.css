@@ -841,7 +841,21 @@ button {
   transform-origin: 50% 50%;
   will-change: transform, opacity;
 }
+@keyframes dial-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+}
+@keyframes name-in {
+  from {
+    opacity: 0;
+    letter-spacing: 0.08em;
+    filter: blur(8px);
+  }
+}
 .dial__core {
+  animation: dial-in 1.6s var(--ease-out) 0.55s both;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -871,6 +885,7 @@ button {
   }
 }
 .dial__name {
+  animation: name-in 2s var(--ease-out) 0.65s both;
   margin: 0;
   max-width: 100%;
   font-family: var(--f-display);
@@ -921,6 +936,7 @@ button {
   }
 }
 .dial__label {
+  animation: fade 1.4s ease 1s both;
   position: absolute;
   left: 50%;
   top: 50%;

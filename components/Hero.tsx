@@ -77,7 +77,7 @@ function paintBackdrop(
       const iw = Math.max(R * 1.55, 240);
       const ih = (iw * art.height) / art.width;
       const [px, py] = P(ac, R * 1.5);
-      ctx.globalAlpha = 0.14 + 0.34 * tuneK + (hovered === i ? 0.3 : 0);
+      ctx.globalAlpha = 0.27 + 0.3 * tuneK + (hovered === i ? 0.3 : 0);
       ctx.drawImage(art, px - iw / 2, py - ih / 2, iw, ih);
     }
     ctx.restore();
@@ -108,7 +108,8 @@ function paintBackdrop(
   }
 }
 
-/** The part that moves every frame: the tick ring, which turns into a waveform when tuned. */
+/** The part that moves every frame: a living tick ring. Idle it breathes and a scanner
+ *  sweeps round it; tuned, it becomes a full orange waveform. */
 function paintRing(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -118,44 +119,85 @@ function paintRing(
   t: number,
   hovered: number,
   level: number,
-  tuneK: number
+  tuneK: number,
+  still: boolean
 ) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const cx = w / 2;
   const cy = h / 2;
+  const TAU = Math.PI * 2;
+  const intro = still ? 1 : clamp((t - 0.3) / 1.6);
+  const ie = 1 - Math.pow(1 - intro, 3);
+  const sweep = still ? 0 : (t * 0.55) % TAU;
+
+  // breathing halo around the ring
+  const pulse = 0.5 + 0.5 * Math.sin(t * 1.4);
+  const halo = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.22);
+  halo.addColorStop(0, 'rgba(251,94,40,0)');
+  halo.addColorStop(0.55, `rgba(251,94,40,${(0.05 + 0.05 * pulse + 0.09 * tuneK) * ie})`);
+  halo.addColorStop(1, 'rgba(251,94,40,0)');
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, w, h);
+
+  // light motes drifting outward from the ring
+  if (!still) {
+    for (let m = 0; m < 48; m++) {
+      const seed = (m * 0.6180339) % 1;
+      const ang = seed * TAU * 3 + m;
+      const speed = 0.045 + ((m * 37) % 11) / 260;
+      const p = (t * speed + seed * 7) % 1;
+      const rr = R * (1.07 + p * 0.95);
+      const alpha = Math.sin(p * Math.PI) * 0.55 * ie;
+      ctx.fillStyle = `rgba(255,${150 + (m % 5) * 18},${90 + (m % 4) * 20},${alpha})`;
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr, 0.9 + (m % 3) * 0.45, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  // ticks
   const per = TICKS / DIAL.length;
   ctx.lineCap = 'round';
   for (let j = 0; j < TICKS; j++) {
-    const a = (j / TICKS) * Math.PI * 2 - Math.PI / 2;
+    const a = (j / TICKS) * TAU - Math.PI / 2;
     const major = j % per === 0;
-    let len = major ? 13 : 6;
-    let alpha = major ? 0.8 : 0.28;
-    let colour = '255,255,255';
+    const rel = (j / TICKS) * TAU; // 0 at the top, clockwise
+    const d = Math.abs(Math.atan2(Math.sin(rel - sweep), Math.cos(rel - sweep)));
+    const sw = Math.exp(-(d * d) / 0.035); // the scanner
+    const idle = Math.sin(t * 1.8 + j * 0.35) * 0.5 + 0.5;
+    let len = (major ? 13 : 6) + (1.2 + idle * 3.2) * (1 - tuneK) + sw * 10;
+    let alpha = major ? 0.8 : 0.3;
+    let kk = Math.max(tuneK, sw * 0.95);
     if (tuneK > 0.01) {
       const w1 = Math.sin(t * 2.2 + j * 0.43) * 0.5 + 0.5;
       const w2 = Math.sin(t * 3.1 - j * 0.17) * 0.5 + 0.5;
       len += tuneK * (2 + w1 * w2 * (6 + level * 30));
-      colour = `251,${Math.round(255 - tuneK * 161)},${Math.round(255 - tuneK * 215)}`;
       alpha = Math.max(alpha, 0.35 + 0.65 * tuneK);
     }
+    alpha = Math.max(alpha, 0.3 + 0.7 * sw) * ie;
+    len *= ie;
+    const colour = `255,${Math.round(255 - kk * 161)},${Math.round(255 - kk * 215)}`;
     const ca = Math.cos(a);
     const sa = Math.sin(a);
+    const r0 = R - 2 - (1 - ie) * 22;
     ctx.strokeStyle = `rgba(${colour},${alpha})`;
-    ctx.lineWidth = major ? 1.6 : 1;
+    ctx.lineWidth = major ? 1.6 : 1 + sw * 0.8;
     ctx.beginPath();
-    ctx.moveTo(cx + ca * (R - 2), cy + sa * (R - 2));
-    ctx.lineTo(cx + ca * (R - 2 + len), cy + sa * (R - 2 + len));
+    ctx.moveTo(cx + ca * r0, cy + sa * r0);
+    ctx.lineTo(cx + ca * (r0 + len), cy + sa * (r0 + len));
     ctx.stroke();
   }
-  const wedge = (Math.PI * 2) / DIAL.length;
-  const ia = (hovered >= 0 ? hovered * wedge : 0) - Math.PI / 2;
+
+  // indicator: rides the scanner while idle, snaps to the hovered sector
+  const wedge = TAU / DIAL.length;
+  const ia = (hovered >= 0 ? hovered * wedge : tuneK > 0.5 ? 0 : sweep) - Math.PI / 2;
   const dx = cx + Math.cos(ia) * (R - 10);
   const dy = cy + Math.sin(ia) * (R - 10);
   ctx.fillStyle = '#fb5e28';
-  ctx.shadowColor = 'rgba(251,94,40,0.9)';
-  ctx.shadowBlur = 14;
+  ctx.shadowColor = 'rgba(251,94,40,0.95)';
+  ctx.shadowBlur = 16;
   ctx.beginPath();
-  ctx.arc(dx, dy, 5 * (1 + 0.22 * Math.sin(t * 4)), 0, Math.PI * 2);
+  ctx.arc(dx, dy, 5 * (1 + 0.22 * Math.sin(t * 4)) * ie, 0, TAU);
   ctx.fill();
   ctx.shadowBlur = 0;
 }
@@ -209,7 +251,7 @@ const Hero: React.FC = () => {
       const h = stage.clientHeight;
       live.current.w = w;
       live.current.h = h;
-      setR(Math.round(clamp(Math.min(w * (w < 520 ? 0.3 : 0.36), h * 0.37), 70, 330)));
+      setR(Math.round(clamp(Math.min(w * (w < 520 ? 0.3 : 0.36), h * 0.4), 70, 360)));
       const c = dialRef.current;
       if (c) {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -350,7 +392,7 @@ const Hero: React.FC = () => {
           smoothLevel = lerp(smoothLevel, sound.level(), 0.2);
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.drawImage(offscreen, 0, 0);
-          paintRing(ctx, L.w, L.h, dpr, L.R, reduced ? 0 : time, L.hovered, smoothLevel, L.tuneK);
+          paintRing(ctx, L.w, L.h, dpr, L.R, reduced ? 0 : time, L.hovered, smoothLevel, L.tuneK, reduced);
         }
       }
     };
