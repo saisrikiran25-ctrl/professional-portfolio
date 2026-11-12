@@ -40,9 +40,17 @@ function ellipsize(ctx: Ctx, text: string, maxW: number) {
   return t + '…';
 }
 
-export function drawCardArt(ctx: Ctx, item: Item, scale = 1) {
-  const w = CARD_W;
-  const h = CARD_H;
+export function drawCardArt(
+  ctx: Ctx,
+  item: Item,
+  scale = 1,
+  W = CARD_W,
+  H = CARD_H,
+  /** px (in art units) kept clear at the bottom for an overlaid title pill */
+  reserve = 70
+) {
+  const w = W;
+  const h = H;
   const c = item.color;
   ctx.save();
   ctx.scale(scale, scale);
@@ -125,17 +133,19 @@ export function drawCardArt(ctx: Ctx, item: Item, scale = 1) {
   ctx.font = `500 11px ${FONT_BODY}`;
   setSpacing(ctx, 1.2);
   ctx.beginPath();
-  ctx.arc(28, h - 112, 3.2, 0, Math.PI * 2);
+  ctx.arc(28, h - reserve - 42, 3.2, 0, Math.PI * 2);
   ctx.fillStyle = '#34d399';
   ctx.fill();
   ctx.fillStyle = 'rgba(242,242,239,0.7)';
-  ctx.fillText(item.status.toUpperCase(), 40, h - 111.5);
+  ctx.fillText(item.status.toUpperCase(), 40, h - reserve - 41.5);
   setSpacing(ctx, 0);
 
   ctx.font = `500 11px ${FONT_BODY}`;
   ctx.fillStyle = 'rgba(242,242,239,0.46)';
-  const tags = item.tags.slice(0, 3).map((t) => ellipsize(ctx, t, 150));
-  ctx.fillText(tags.join('   ·   '), 24, h - 90);
+  const shown = item.tags.slice(0, 3);
+  const tagW = Math.max(150, (w - 48) / Math.max(1, shown.length) - 30);
+  const tags = shown.map((t) => ellipsize(ctx, t, tagW));
+  ctx.fillText(tags.join('   ·   '), 24, h - reserve - 20);
 
   ctx.restore();
 }

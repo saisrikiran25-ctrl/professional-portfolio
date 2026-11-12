@@ -103,9 +103,8 @@ const Work: React.FC = () => {
     };
   }, [reduced]);
   useEffect(() => {
-    const art = assets?.arts.get(item.id);
-    if (art) stageRef.current?.setSource(art);
-  }, [assets, item.id]);
+    if (assets) stageRef.current?.setItem(item);
+  }, [assets, item]);
 
   const pick = (i: number, id: string, k: number) => {
     setTrack(i);
