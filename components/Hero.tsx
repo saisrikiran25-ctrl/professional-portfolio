@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FEATURED, KIND_LABEL } from '../lib/items';
+import { FEATURED, ITEM_BY_ID, KIND_LABEL, SECTION_ART } from '../lib/items';
+import { warpTo } from '../lib/warp';
 import { createCorridor, CORRIDOR_TRAVEL, Corridor, RGB } from '../lib/scene';
 import { sound } from '../lib/audio';
 import { clamp, lerp, smooth, useSound } from '../lib/hooks';
@@ -450,16 +451,26 @@ const Hero: React.FC = () => {
     }
   };
 
-  const goto = useCallback((d: DialSector) => {
+  const goto = useCallback((d: DialSector, x: number, y: number) => {
     sound.thock(0.6);
-    if (d.track !== undefined) window.dispatchEvent(new CustomEvent(TRACK_EVENT, { detail: d.track }));
-    else scrollToTarget(d.href, -8);
+    const color = (ITEM_BY_ID.get(d.art)?.color ?? SECTION_ART.find((s) => s.id === d.art)?.color ?? [251, 94, 40]) as [number, number, number];
+    // an iris warp instead of scrolling through everything in between
+    warpTo({
+      label: d.label,
+      color,
+      x,
+      y,
+      go: () => {
+        if (d.track !== undefined) window.dispatchEvent(new CustomEvent(TRACK_EVENT, { detail: { track: d.track, instant: true } }));
+        else scrollToTarget(d.href, -8, true);
+      },
+    });
   }, []);
 
   const onStageClick = (e: React.MouseEvent) => {
     if (dialUiRef.current && dialUiRef.current.style.pointerEvents === 'none') return;
     const i = sectorAt(e);
-    if (i >= 0) goto(DIAL[i]);
+    if (i >= 0) goto(DIAL[i], e.clientX, e.clientY);
   };
 
   const jumpTo = (i: number) => {
@@ -531,7 +542,7 @@ const Hero: React.FC = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  goto(d);
+                  goto(d, e.clientX, e.clientY);
                 }}
                 onFocus={() => {
                   live.current.hovered = i;

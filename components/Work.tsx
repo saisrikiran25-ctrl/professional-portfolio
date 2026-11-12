@@ -69,16 +69,16 @@ const Work: React.FC = () => {
   }, [sticky]);
 
   const goTrack = useCallback(
-    (i: number, fromUser = true) => {
+    (i: number, fromUser = true, instant = false) => {
       const el = scrollRef.current;
       setTrack(i);
       if (fromUser) sound.blip(i * 2, 0.45);
       if (!el) return;
       if (sticky) {
         const span = el.offsetHeight - window.innerHeight;
-        scrollToY(el.getBoundingClientRect().top + window.scrollY + (span * (i + 0.5)) / TRACKS.length);
+        scrollToY(el.getBoundingClientRect().top + window.scrollY + (span * (i + 0.5)) / TRACKS.length, instant);
       } else {
-        scrollToTarget(`#track-${i}`, -80);
+        scrollToTarget(`#track-${i}`, -80, instant);
       }
     },
     [sticky]
@@ -86,7 +86,11 @@ const Work: React.FC = () => {
 
   // the intro dial / footer links can request a specific track
   useEffect(() => {
-    const on = (e: Event) => goTrack((e as CustomEvent<number>).detail ?? 0, false);
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<number | { track: number; instant?: boolean }>).detail;
+      const track = typeof d === 'number' ? d : d?.track ?? 0;
+      goTrack(track, false, typeof d === 'object' && !!d?.instant);
+    };
     window.addEventListener(TRACK_EVENT, on);
     return () => window.removeEventListener(TRACK_EVENT, on);
   }, [goTrack]);

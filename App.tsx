@@ -10,6 +10,8 @@ import Footer from './components/Footer';
 import FullIndex from './components/FullIndex';
 import Viewer from './components/Viewer';
 import { Cursor, Dock, Header, Preloader, Toast } from './components/Chrome';
+import Warp from './components/Warp';
+import { warpTo } from './lib/warp';
 import { Assets, loadAssets } from './lib/assets';
 import { initScroll, scrollToTarget, scrollToY } from './lib/scroll';
 import { TRACK_EVENT, UIContext, UIState } from './lib/ui';
@@ -73,16 +75,47 @@ const Experience: React.FC = () => {
       const href = a.getAttribute('href') || '';
       if (href === '#' || href.startsWith('#/') || href === '#privacy') return;
       e.preventDefault();
-      const go = () => {
-        if (a.dataset.track !== undefined) {
-          window.dispatchEvent(new CustomEvent(TRACK_EVENT, { detail: Number(a.dataset.track) }));
+      const LABELS: Record<string, string> = {
+        '#top': 'Start',
+        '#about': 'About',
+        '#work': 'Work',
+        '#telemetry': 'Telemetry',
+        '#origins': 'Origins',
+        '#credentials': 'Credentials',
+        '#contact': 'Connect',
+      };
+      const track = a.dataset.track;
+      const target = href === '#top' ? null : document.querySelector<HTMLElement>(href);
+      const destY = href === '#top' ? 0 : target ? target.getBoundingClientRect().top + window.scrollY : window.scrollY;
+      const far = Math.abs(destY - window.scrollY) > window.innerHeight * 1.6;
+      const jump = () => {
+        if (track !== undefined) {
+          window.dispatchEvent(new CustomEvent(TRACK_EVENT, { detail: { track: Number(track), instant: true } }));
+        } else if (href === '#top') scrollToY(0, true);
+        else scrollToTarget(href, -8, true);
+      };
+      const glide = () => {
+        if (track !== undefined) {
+          window.dispatchEvent(new CustomEvent(TRACK_EVENT, { detail: Number(track) }));
         } else if (href === '#top') scrollToY(0);
         else scrollToTarget(href, -8);
       };
+      const run = () => {
+        if (!far) return glide();
+        const cx = e.clientX || window.innerWidth / 2;
+        const cy = e.clientY || window.innerHeight / 2;
+        warpTo({
+          label: LABELS[href] ?? a.textContent?.trim() ?? 'Section',
+          color: [251, 94, 40],
+          x: cx,
+          y: cy,
+          go: jump,
+        });
+      };
       if (fullOpen) {
         setFullOpen(false);
-        setTimeout(go, 80);
-      } else go();
+        setTimeout(run, 80);
+      } else run();
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);
@@ -107,6 +140,7 @@ const Experience: React.FC = () => {
   return (
     <UIContext.Provider value={ui}>
       <Preloader done={ready} />
+      <Warp />
       <Cursor />
       <a className="skip" href="#work">
         Skip to the work

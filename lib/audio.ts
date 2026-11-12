@@ -246,6 +246,32 @@ class SoundEngine {
     this.bell(step + 3, vel * 0.7, pan, 0.55);
   }
 
+  /** Section warp: a filtered-noise sweep that rises, then two bells as you arrive. */
+  whoosh() {
+    if (!this.ctx || !this._on) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    src.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 2.2;
+    bp.frequency.setValueAtTime(260, now);
+    bp.frequency.exponentialRampToValueAtTime(3200, now + 0.6);
+    bp.frequency.exponentialRampToValueAtTime(700, now + 1.2);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.07, now + 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
+    src.connect(bp).connect(g).connect(this.master);
+    g.connect(this.send);
+    src.start(now);
+    src.stop(now + 1.3);
+    setTimeout(() => this.bell(7, 0.5, -0.1, 1.2), 620);
+    setTimeout(() => this.bell(11, 0.45, 0.2, 1.5), 760);
+  }
+
   /** Press / open — a low, rounded tap with a hint of click. */
   thock(vel = 0.6) {
     if (!this.ctx || !this._on) return;

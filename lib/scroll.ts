@@ -32,9 +32,9 @@ export function scrollToY(y: number, immediate = false) {
   else window.scrollTo({ top: y, behavior: immediate ? 'auto' : 'smooth' });
 }
 
-export function scrollToTarget(target: string | HTMLElement, offset = 0) {
+export function scrollToTarget(target: string | HTMLElement, offset = 0, immediate = false) {
   const el = typeof target === 'string' ? document.querySelector<HTMLElement>(target) : target;
   if (!el) return;
   const y = el.getBoundingClientRect().top + window.scrollY + offset;
-  scrollToY(y);
+  scrollToY(y, immediate);
 }

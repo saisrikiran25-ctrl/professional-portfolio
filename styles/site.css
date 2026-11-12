@@ -2925,6 +2925,112 @@ button {
 }
 
 /* =====================================================================
+   Warp — the iris transition between sections
+   ===================================================================== */
+.warp {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: all;
+  overflow: hidden;
+}
+.warp__veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x) var(--y), rgba(var(--c), 0.5), rgba(var(--c), 0.08) 38%, transparent 62%), #070a0f;
+  clip-path: circle(0px at var(--x) var(--y));
+  transition: clip-path 0.76s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.warp.is-in .warp__veil {
+  clip-path: circle(160vmax at var(--x) var(--y));
+}
+.warp.is-out .warp__veil {
+  clip-path: circle(0px at 50% 50%);
+  transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.2, 1);
+}
+.warp__ring {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 160px;
+  height: 160px;
+  margin: -80px 0 0 -80px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(var(--c), 0.9);
+  opacity: 0;
+}
+.warp.is-in .warp__ring {
+  animation: warp-ring 1.1s var(--ease-out) forwards;
+  animation-delay: calc(var(--i) * 110ms);
+}
+@keyframes warp-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(0.15);
+  }
+  to {
+    opacity: 0;
+    transform: scale(14);
+  }
+}
+.warp__label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.warp.is-in .warp__label {
+  opacity: 1;
+  transition: opacity 0.5s 0.28s;
+}
+.warp.is-out .warp__label {
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.warp__label small {
+  display: block;
+  font: 700 11px var(--f-body);
+  letter-spacing: 0.34em;
+  color: var(--accent);
+}
+.warp__label strong {
+  display: block;
+  margin-top: 14px;
+  font: 700 clamp(34px, 8vw, 96px) var(--f-display);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  transform: scale(0.94);
+  transition: transform 1.1s var(--ease-out) 0.2s;
+}
+.warp.is-in .warp__label strong {
+  transform: none;
+}
+.warp__bar {
+  display: block;
+  width: min(220px, 50vw);
+  height: 2px;
+  margin: 22px auto 0;
+  background: rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+.warp__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.warp.is-in .warp__bar::after {
+  transform: scaleX(1);
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s;
+}
+
+/* =====================================================================
    Reduced motion
    ===================================================================== */
 @media (prefers-reduced-motion: reduce) {
