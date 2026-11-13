@@ -2046,25 +2046,19 @@ button {
   color: rgba(242, 242, 239, 0.07);
   will-change: transform, opacity;
 }
-.tl__y--in {
-  animation: year-in 1s var(--ease-out) both;
+/* scroll-linked: --e (0 to 1) is set from the scroll position, so the year moves with the page */
+.tl__year {
+  --e: 0;
 }
-.tl__y--out {
-  animation: year-out 0.9s var(--ease-out) both;
+.tl__y--a {
+  opacity: calc(1 - var(--e));
+  transform: translateY(calc(var(--e) * -36px));
+  filter: blur(calc(var(--e) * 8px));
 }
-@keyframes year-in {
-  from {
-    opacity: 0;
-    transform: translateY(calc(var(--dir, 1) * 34px));
-    filter: blur(8px);
-  }
-}
-@keyframes year-out {
-  to {
-    opacity: 0;
-    transform: translateY(calc(var(--dir, 1) * -34px));
-    filter: blur(8px);
-  }
+.tl__y--b {
+  opacity: var(--e);
+  transform: translateY(calc((1 - var(--e)) * 36px));
+  filter: blur(calc((1 - var(--e)) * 8px));
 }
 .tl__list {
   --p: 0;

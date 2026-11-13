@@ -1,3 +1,4 @@
+import { flushSync } from 'react-dom';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { certifications, education } from '../data';
 import { clamp, useReveal } from '../lib/hooks';
@@ -208,7 +209,7 @@ const words = [
   'ZERO-TO-ONE ARCHITECTURE',
   '600+ PROMPT SYSTEMS',
   'DISCIPLINE EQUALS FREEDOM',
-  'TOP 250 PROMPTBASE',
+  'TOP 200 PROMPTBASE',
   'SYNTHETIX & AGENTGUARD',
   'THE AI LANDSCAPE',
   'IIM BANGALORE DBE',
@@ -307,18 +308,7 @@ const Viz: React.FC<{ timeline: string; details: string[] }> = ({ timeline, deta
 const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
   const listRef = useRef<HTMLOListElement>(null);
   const [cur, setCur] = useState(0);
-  // the year crossfades: the old one drifts out while the new one drifts in, in the scroll direction
-  const prevCur = useRef(0);
-  const [dir, setDir] = useState(1);
-  const [leaving, setLeaving] = useState<{ idx: number; k: number } | null>(null);
-  useEffect(() => {
-    if (cur === prevCur.current) return;
-    setDir(cur > prevCur.current ? 1 : -1);
-    setLeaving({ idx: prevCur.current, k: Date.now() });
-    prevCur.current = cur;
-    const t = setTimeout(() => setLeaving(null), 1000);
-    return () => clearTimeout(t);
-  }, [cur]);
+  const yearRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = listRef.current;
@@ -331,12 +321,20 @@ const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
       const line = window.innerHeight * 0.6;
       el.style.setProperty('--p', String(clamp((line - r.top) / r.height)));
       let active = 0;
+      const tops = items.map((it) => it.getBoundingClientRect().top);
       items.forEach((it, i) => {
-        const past = it.getBoundingClientRect().top + 60 < line;
+        const past = tops[i] + 60 < line;
         it.classList.toggle('is-past', past);
         if (past) active = i;
       });
-      setCur((c) => (c === active ? c : active));
+      // the big year is scroll-linked: over the last stretch before the next card reaches the
+      // reading line, the current year drifts out while the next one drifts in
+      const next = tops[active + 1];
+      const span = 300;
+      const k = next === undefined ? 0 : clamp((line - 60 + span - next) / span);
+      const e = k * k * (3 - 2 * k);
+      flushSync(() => setCur((c) => (c === active ? c : active)));
+      yearRef.current?.style.setProperty('--e', e.toFixed(4));
     };
     const on = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -353,16 +351,10 @@ const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
 
   return (
     <div className="tl">
-      <div className="tl__year" aria-hidden="true" style={{ ['--dir' as string]: dir }}>
+      <div className="tl__year" aria-hidden="true" ref={yearRef}>
         <div className="tl__yearbox">
-          {leaving && (
-            <span key={`out${leaving.k}`} className="tl__y tl__y--out">
-              {entries[leaving.idx]?.year}
-            </span>
-          )}
-          <span key={`in${cur}`} className="tl__y tl__y--in">
-            {entries[cur]?.year}
-          </span>
+          <span className="tl__y tl__y--a">{entries[cur]?.year}</span>
+          {entries[cur + 1] && <span className="tl__y tl__y--b">{entries[cur + 1].year}</span>}
         </div>
       </div>
       <ol className="tl__list" ref={listRef}>
