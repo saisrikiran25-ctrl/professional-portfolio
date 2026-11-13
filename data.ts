@@ -110,6 +110,36 @@ export const projects: Project[] = [
     link: 'https://saisrikiran25-ctrl.github.io/lexis-policy-analyzer/',
     status: 'Live'
   },
+  {
+    id: 'decision-simulator',
+    title: 'Decision Simulator',
+    category: 'WRAPPER',
+    description: 'Interactive decision simulator for exploring business scenarios, comparing assumptions and evaluating strategic trade-offs. The demo stress-tests a ₹25 crore, 36-month cloud transformation proposal before the Board does.',
+    techStack: ['Scenario Simulator', 'Jarvis AI Advisor', 'Interactive Dashboards'],
+    features: [
+      'Stress-Test Assumptions',
+      'Ask Jarvis (AI Advisor)',
+      'Board Decision Framing',
+      'Illustrative Scenarios'
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/decision-simulator/',
+    status: 'Live'
+  },
+  {
+    id: 'sop-builder',
+    title: 'SOP Builder',
+    category: 'WRAPPER',
+    description: 'Prompt-based SOP builder for organizations and HR teams. Turns messy process knowledge into procedures a team actually follows: paste notes, transcripts or workflow outlines and get clear steps with roles, exceptions and flagged gaps in seconds.',
+    techStack: ['Prompt-Driven Generation', 'Process Documentation', 'HR Workflows'],
+    features: [
+      'Notes To Structured SOPs',
+      'Roles & Steps',
+      'Exceptions & Gaps Flagged',
+      'Built For HR Teams'
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/standard-operating-procedures-builder/',
+    status: 'Live'
+  },
 
   // SECTION C: CUSTOM GPTs
   {

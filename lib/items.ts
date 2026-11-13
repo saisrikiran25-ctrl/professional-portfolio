@@ -16,14 +16,24 @@ const DEMO_IDS = [
   'portfolio-forge',
   'promptboss',
   'lexis',
+  'decision-simulator',
+  'sop-builder',
   'build-pilot',
   'atlas',
   'urja-kaushal',
   'between-the-tiers',
   'venture-0',
 ];
+/** Custom GPTs keep the generated art of the other tracks; their video still plays in the viewer. */
+const ART_ONLY_IDS = ['build-pilot', 'atlas'];
 const demoOf = (id: string) =>
-  DEMO_IDS.includes(id) ? { thumb: `media/thumbs/${id}.jpg`, video: `media/demos/${id}.mp4` } : {};
+  DEMO_IDS.includes(id)
+    ? {
+        ...(ART_ONLY_IDS.includes(id) ? {} : { thumb: `media/thumbs/${id}.jpg` }),
+        poster: `media/thumbs/${id}.jpg`,
+        video: `media/demos/${id}.mp4`,
+      }
+    : {};
 
 export interface Item {
   id: string;
@@ -43,6 +53,8 @@ export interface Item {
   logo?: string;
   /** poster frame (a real frame from the demo) drawn instead of the generated art */
   thumb?: string;
+  /** still shown in the video player before it plays */
+  poster?: string;
   /** product demo video, played in the viewer */
   video?: string;
   /** overrides the kind label on generated art */

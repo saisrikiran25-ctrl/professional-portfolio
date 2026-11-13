@@ -42,6 +42,7 @@ function ellipsize(ctx: Ctx, text: string, maxW: number) {
 
 /** Poster frames for items that have a demo video, filled in by loadThumbs(). */
 export const THUMBS = new Map<string, HTMLImageElement>();
+const LIGHT_THUMBS = new Set<string>();
 
 export function loadThumbs(items: Item[]): Promise<void> {
   const jobs = items
@@ -53,6 +54,19 @@ export function loadThumbs(items: Item[]): Promise<void> {
           img.decoding = 'async';
           img.onload = () => {
             THUMBS.set(i.id, img);
+            // light artwork (white editorial covers) looks muddy under a dark shade
+            try {
+              const s = document.createElement('canvas');
+              s.width = s.height = 8;
+              const c = s.getContext('2d')!;
+              c.drawImage(img, 0, 0, 8, 8);
+              const d = c.getImageData(0, 0, 8, 8).data;
+              let l = 0;
+              for (let p = 0; p < d.length; p += 4) l += (d[p] * 0.2126 + d[p + 1] * 0.7152 + d[p + 2] * 0.0722) / 255;
+              if (l / 64 > 0.7) LIGHT_THUMBS.add(i.id);
+            } catch {
+              /* keep the default shade */
+            }
             resolve();
           };
           img.onerror = () => resolve(); // fall back to the generated art
@@ -75,19 +89,23 @@ function drawThumb(ctx: Ctx, img: HTMLImageElement, item: Item, w: number, h: nu
     sx = (img.naturalWidth - sw) / 2;
   } else {
     sh = sw / br;
-    sy = (img.naturalHeight - sh) * 0.3; // interfaces keep their header: bias to the top
+    sy = (img.naturalHeight - sh) * 0.5;
   }
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
 
-  const shade = ctx.createLinearGradient(0, h * 0.5, 0, h);
-  shade.addColorStop(0, 'rgba(6,8,12,0)');
-  shade.addColorStop(1, 'rgba(6,8,12,0.72)');
-  ctx.fillStyle = shade;
-  ctx.fillRect(0, h * 0.5, w, h * 0.5);
+  const light = LIGHT_THUMBS.has(item.id);
+  if (!light) {
+    const shade = ctx.createLinearGradient(0, h * 0.5, 0, h);
+    shade.addColorStop(0, 'rgba(6,8,12,0)');
+    shade.addColorStop(1, 'rgba(6,8,12,0.72)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, h * 0.5, w, h * 0.5);
+  }
 
   if (!text) return;
+  if (light) return; // the artwork already carries its own title
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.font = `600 11px ${FONT_BODY}`;

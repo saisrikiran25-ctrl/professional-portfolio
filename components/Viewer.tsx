@@ -116,7 +116,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
                 key={item.id}
                 ref={videoRef}
                 src={item.video}
-                poster={item.thumb}
+                poster={item.poster ?? item.thumb}
                 controls
                 playsInline
                 preload="metadata"
