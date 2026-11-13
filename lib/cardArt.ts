@@ -111,41 +111,49 @@ export function drawCardArt(
   ctx.fillText(`${(item.kicker ?? KIND_LABEL[item.kind]).toUpperCase()}  ·  ${String(item.n).padStart(2, '0')}`, 24, 30);
   setSpacing(ctx, 0);
 
-  // title
+  // layout from the bottom up: tags, then status, then the title a clear gap above.
+  // `reserve` keeps everything above the title pill that overlays the bottom of the card.
+  const tagsY = h - reserve - 16;
+  const statusY = tagsY - 26;
+  const titleBase = statusY - 40;
+
+  // title — shrinks only if it would run up into the kicker
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#f2f2ef';
-  let size = 34;
+  let size = 36;
   let lines: string[] = [];
   const maxW = w - 64;
   for (; size >= 18; size -= 2) {
     ctx.font = `600 ${size}px ${FONT_DISPLAY}`;
     setSpacing(ctx, -size * 0.03);
     lines = wrap(ctx, item.title, maxW);
-    if (lines.length <= 2 && lines.every((l) => ctx.measureText(l).width <= maxW)) break;
+    const top = titleBase - (Math.min(lines.length, 2) - 1) * size * 1.12 - size * 0.78;
+    if (lines.length <= 2 && lines.every((l) => ctx.measureText(l).width <= maxW) && top >= 62) break;
   }
   const lh = size * 1.12;
-  const ty = h * 0.42 + (lines.length === 1 ? lh * 0.35 : 0);
-  lines.slice(0, 2).forEach((l, i) => ctx.fillText(l, 24, ty + i * lh));
+  const shownLines = lines.slice(0, 2);
+  shownLines.forEach((l, i) => ctx.fillText(l, 24, titleBase - (shownLines.length - 1 - i) * lh));
   setSpacing(ctx, 0);
 
-  // status + tags sit above the title pill that overlays the bottom of the card
+  // status
   ctx.textBaseline = 'middle';
   ctx.font = `500 11px ${FONT_BODY}`;
   setSpacing(ctx, 1.2);
   ctx.beginPath();
-  ctx.arc(28, h - reserve - 42, 3.2, 0, Math.PI * 2);
+  ctx.arc(28, statusY, 3.2, 0, Math.PI * 2);
   ctx.fillStyle = '#34d399';
   ctx.fill();
   ctx.fillStyle = 'rgba(242,242,239,0.7)';
-  ctx.fillText(item.status.toUpperCase(), 40, h - reserve - 41.5);
+  ctx.fillText(item.status.toUpperCase(), 40, statusY + 0.5);
   setSpacing(ctx, 0);
 
+  // tags — quiet text, no pills
   ctx.font = `500 11px ${FONT_BODY}`;
   ctx.fillStyle = 'rgba(242,242,239,0.46)';
   const shown = item.tags.slice(0, 3);
   const tagW = Math.max(150, (w - 48) / Math.max(1, shown.length) - 30);
   const tags = shown.map((t) => ellipsize(ctx, t, tagW));
-  ctx.fillText(tags.join('   ·   '), 24, h - reserve - 20);
+  ctx.fillText(tags.join('   ·   '), 24, tagsY);
 
   ctx.restore();
 }
