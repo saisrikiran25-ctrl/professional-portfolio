@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Terminal, X } from 'lucide-react';
 import { sound } from '../lib/audio';
+import { Arrow } from './Bits';
 import { useMedia, useSound } from '../lib/hooks';
 import { prefersReducedMotion, startScroll, stopScroll } from '../lib/scroll';
 
@@ -182,6 +183,7 @@ export const Dock: React.FC<{ openCmdK: () => void }> = ({ openCmdK }) => {
           <span>
             Connect<span className="float-cta__long"> &amp; collaborate with Sai</span>
           </span>
+          <Arrow size={13} />
         </a>
       </div>
     </>
