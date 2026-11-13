@@ -594,18 +594,6 @@ const Hero: React.FC = () => {
                 'Choose a signal'
               )}
             </p>
-            {!tuned && (
-              <button
-                type="button"
-                className="dial__quiet"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  tune(false);
-                }}
-              >
-                continue without sound
-              </button>
-            )}
           </div>
 
           {DIAL.map((d, i) => {

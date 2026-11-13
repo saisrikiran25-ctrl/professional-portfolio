@@ -956,17 +956,6 @@ button {
   letter-spacing: 0.22em;
   color: var(--muted);
 }
-.dial__quiet {
-  margin-top: calc(var(--R) * 0.09);
-  font: 500 clamp(8px, calc(var(--R) * 0.048), 12px) var(--f-body);
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  transition: color 0.25s;
-}
-.dial__quiet:hover {
-  color: var(--fg);
-}
 .dial__hint {
   margin: calc(var(--R) * 0.09) 0 0;
   font: 700 clamp(8px, calc(var(--R) * 0.044), 11px) var(--f-body);
