@@ -4,6 +4,7 @@ import { ITEMS, ITEM_BY_ID, KIND_LABEL, rgb } from '../lib/items';
 import { sound } from '../lib/audio';
 import { startScroll, stopScroll } from '../lib/scroll';
 import { paintArtTo } from '../lib/cardArt';
+import ArtText from './ArtText';
 import { useUI } from '../lib/ui';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -76,7 +77,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv || !item || !assets) return;
-    const draw = () => paintArtTo(cv, item, 70);
+    const draw = () => paintArtTo(cv, item, 70, false);
     draw();
     const ro = new ResizeObserver(draw);
     ro.observe(cv);
@@ -100,7 +101,10 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
         </button>
 
         <div className="viewer__art" key={item.id}>
-          <canvas ref={canvasRef} width={896} height={560} aria-hidden="true" />
+          <div className="viewer__card">
+            <canvas ref={canvasRef} width={896} height={560} aria-hidden="true" />
+            <ArtText item={item} pill={false} />
+          </div>
         </div>
 
         <div className="viewer__info" key={`i${item.id}`}>

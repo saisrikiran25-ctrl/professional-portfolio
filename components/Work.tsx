@@ -6,6 +6,7 @@ import { clamp, useMedia, useReveal } from '../lib/hooks';
 import { prefersReducedMotion, scrollToTarget, scrollToY } from '../lib/scroll';
 import { TRACK_EVENT, useUI } from '../lib/ui';
 import { Arrow, Eyebrow, Split } from './Bits';
+import ArtText from './ArtText';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -197,6 +198,7 @@ const Work: React.FC = () => {
             <div className="work__right">
               <div className="preview" style={{ ['--c' as string]: item.color.join(',') }}>
                 <canvas ref={canvasRef} className="preview__canvas" aria-hidden="true" />
+                <ArtText item={item} key={item.id} />
                 <div className="preview__bar">
                   <span className="chip">
                     <b>{item.title}</b>

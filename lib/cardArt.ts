@@ -47,7 +47,9 @@ export function drawCardArt(
   W = CARD_W,
   H = CARD_H,
   /** px (in art units) kept clear at the bottom for an overlaid title pill */
-  reserve = 70
+  reserve = 70,
+  /** false: graphics only (the words are real DOM text laid over the canvas) */
+  text = true
 ) {
   const w = W;
   const h = H;
@@ -101,6 +103,11 @@ export function drawCardArt(
   ctx.strokeStyle = rgb(c, 0.22);
   ctx.strokeText(String(item.n).padStart(2, '0'), w - 8, h * 0.9);
   setSpacing(ctx, 0);
+
+  if (!text) {
+    ctx.restore();
+    return;
+  }
 
   // kicker
   ctx.textAlign = 'left';
@@ -183,7 +190,7 @@ export const MAX_DPR = 4;
  * the type stays sharp at any browser zoom or screen density. Call again on resize.
  * `reserve` keeps content clear of a title pill overlaid at the bottom.
  */
-export function paintArtTo(canvas: HTMLCanvasElement, item: Item, reserve = 70) {
+export function paintArtTo(canvas: HTMLCanvasElement, item: Item, reserve = 70, withText = true) {
   const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
   const cssW = canvas.clientWidth || CARD_W;
   const cssH = canvas.clientHeight || CARD_H;
@@ -197,5 +204,5 @@ export function paintArtTo(canvas: HTMLCanvasElement, item: Item, reserve = 70) 
   ctx.clearRect(0, 0, bw, bh);
   // design space is 448 wide; scale to the canvas and let the height follow its aspect
   const scale = bw / CARD_W;
-  drawCardArt(ctx, item, scale, CARD_W, bh / scale, reserve);
+  drawCardArt(ctx, item, scale, CARD_W, bh / scale, reserve, withText);
 }

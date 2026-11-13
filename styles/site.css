@@ -3063,6 +3063,94 @@ button {
   color: var(--fg);
 }
 
+/* ---- project card words: real text over the canvas art ------------------- */
+.arttext {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  text-align: left;
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(16px, 2.2vw, 26px) clamp(18px, 2.4vw, 30px) clamp(78px, 7vw, 92px);
+  pointer-events: none;
+  animation: arttext-in 0.9s var(--ease-out) 0.25s both;
+}
+.arttext--free {
+  padding-bottom: clamp(18px, 2.2vw, 28px);
+}
+@keyframes arttext-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(6px);
+  }
+}
+.arttext__kicker {
+  margin: 0;
+  font: 700 clamp(10px, 0.9vw, 12px) var(--f-body);
+  letter-spacing: 0.24em;
+}
+.arttext__kicker i {
+  margin: 0 0.9em;
+  font-style: normal;
+  opacity: 0.7;
+}
+.arttext__title {
+  margin: 0;
+  font: 600 clamp(24px, 3.4vw, 46px) var(--f-display);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: #f2f2ef;
+  text-wrap: balance;
+}
+.arttext__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: clamp(10px, 1.2vw, 16px) 0 0;
+  font: 500 clamp(11px, 0.95vw, 13px) var(--f-body);
+  color: rgba(242, 242, 239, 0.62);
+}
+.arttext__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(242, 242, 239, 0.88);
+}
+.arttext__status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 10px #34d399;
+}
+.arttext__tags {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.viewer__card {
+  position: relative;
+  width: 100%;
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: 0 40px 100px -30px rgba(var(--c), 0.55), 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+.viewer__card canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  box-shadow: none;
+  border-radius: 0;
+}
+
 /* ---- opening scene: veil, grain, caption, instrument frame ------------- */
 .hero__veil {
   position: absolute;

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FEATURED, ITEMS, ITEM_BY_ID, KIND_LABEL, SECTION_ART } from '../lib/items';
 import { warpTo } from '../lib/warp';
 import { paintArtTo } from '../lib/cardArt';
+import ArtText from './ArtText';
 import { createCorridor, CORRIDOR_TRAVEL, Corridor, RGB } from '../lib/scene';
 import { sound } from '../lib/audio';
 import { clamp, lerp, smooth, useSound } from '../lib/hooks';
@@ -464,7 +465,7 @@ const Hero: React.FC = () => {
     const next = active === 0 && frontRef.current === 0 && !imgA.current?.dataset.drawn ? 0 : 1 - frontRef.current;
     const cv = next === 0 ? imgA.current : imgB.current;
     if (!cv) return;
-    paintArtTo(cv, FEATURED[active], 78);
+    paintArtTo(cv, FEATURED[active], 78, false);
     cv.dataset.drawn = '1';
     frontRef.current = next;
     setFront(next);
@@ -475,7 +476,7 @@ const Hero: React.FC = () => {
     if (!host || !assets) return;
     const ro = new ResizeObserver(() => {
       const cv = frontRef.current === 0 ? imgA.current : imgB.current;
-      if (cv) paintArtTo(cv, FEATURED[activeRef.current], 78);
+      if (cv) paintArtTo(cv, FEATURED[activeRef.current], 78, false);
     });
     ro.observe(host);
     return () => ro.disconnect();
@@ -654,6 +655,7 @@ const Hero: React.FC = () => {
             >
               <canvas ref={imgA} className={`reel__img ${front === 0 ? 'is-front' : ''}`} width={896} height={560} aria-hidden="true" />
               <canvas ref={imgB} className={`reel__img ${front === 1 ? 'is-front' : ''}`} width={896} height={560} aria-hidden="true" />
+              <ArtText item={item} key={`t${item.id}`} />
               <span className="reel__chip" key={item.id}>
                 <b>{item.title}</b>
                 <i>{KIND_LABEL[item.kind]}</i>

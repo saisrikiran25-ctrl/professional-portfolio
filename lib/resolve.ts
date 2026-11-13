@@ -68,7 +68,7 @@ export class ArtStage {
     const c = this.art.getContext('2d')!;
     c.clearRect(0, 0, bw, bh);
     // the title pill (~64 css px) sits over the bottom of the box: keep content above it
-    drawCardArt(c, item, dpr, w, h, 64);
+    drawCardArt(c, item, dpr, w, h, 64, false);
   }
 
   setItem(item: Item) {
