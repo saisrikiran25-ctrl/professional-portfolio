@@ -1111,7 +1111,7 @@ button {
   position: relative;
   display: block;
   width: min(560px, 70vw);
-  aspect-ratio: 448 / 280;
+  aspect-ratio: 16 / 9;
   container-type: size;
   border-radius: var(--r);
   overflow: hidden;
@@ -1401,14 +1401,21 @@ button {
 }
 .preview {
   --c: 251, 94, 40;
+  /* the picture is a fixed 16:9 frame; the box takes the width that frame needs for this height */
+  --pv: clamp(230px, 42vh, 470px);
   position: relative;
-  height: clamp(280px, 47vh, 540px);
-  container-type: size;
+  width: min(100%, calc(var(--pv) * 16 / 9));
   border-radius: var(--r);
   overflow: hidden;
   background: #0b0e14;
   box-shadow: 0 50px 130px -60px rgba(var(--c), 0.65);
   transition: box-shadow 1s var(--ease-out);
+}
+.preview__stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  container-type: size;
+  overflow: hidden;
 }
 .preview__canvas {
   position: absolute;
@@ -1417,32 +1424,12 @@ button {
   height: 100%;
   display: block;
 }
+/* title and button sit in a strip beneath the picture, never over it */
 .preview__bar {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-}
-/* poster art is shown whole: the title chip and button sit in a strip beneath it,
-   never over the picture */
-.preview--poster {
-  display: flex;
-  flex-direction: column;
-}
-.preview--poster .preview__canvas {
-  position: relative;
-  inset: auto;
-  flex: 1 1 0;
-  min-height: 0;
-  height: auto;
-}
-.preview--poster .preview__bar {
-  position: static;
-  flex: none;
   padding: 10px 14px 12px;
 }
 
@@ -1526,7 +1513,7 @@ button {
     padding-bottom: 6px;
   }
   .preview {
-    height: clamp(212px, 36vh, 340px);
+    --pv: clamp(200px, 36vh, 330px);
   }
   .detail__desc {
     font-size: 14px;

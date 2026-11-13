@@ -168,10 +168,10 @@ const FullIndex: React.FC<Props> = ({ open, onClose }) => {
           <canvas ref={ringRef} className="fi__ring" aria-hidden="true" />
           <div
             className={`fi__preview ${hover ? 'is-on' : ''}`}
-            style={{ left: cx, top: cy, width: pw, height: pw * 0.625 }}
+            style={{ left: cx, top: cy, width: pw, height: pw * 0.5625 }}
             aria-hidden="true"
           >
-            <canvas ref={prevRef} width={896} height={560} />
+            <canvas ref={prevRef} width={896} height={504} />
           </div>
 
           {placedR.map(({ row, x, y }, i) =>

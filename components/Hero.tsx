@@ -653,8 +653,8 @@ const Hero: React.FC = () => {
               }}
               aria-label={`Open ${item.title}`}
             >
-              <canvas ref={imgA} className={`reel__img ${front === 0 ? 'is-front' : ''}`} width={896} height={560} aria-hidden="true" />
-              <canvas ref={imgB} className={`reel__img ${front === 1 ? 'is-front' : ''}`} width={896} height={560} aria-hidden="true" />
+              <canvas ref={imgA} className={`reel__img ${front === 0 ? 'is-front' : ''}`} width={896} height={504} aria-hidden="true" />
+              <canvas ref={imgB} className={`reel__img ${front === 1 ? 'is-front' : ''}`} width={896} height={504} aria-hidden="true" />
               <ArtText item={item} key={`t${item.id}`} />
               {!item.thumb && (
                 <span className="reel__chip" key={item.id}>

@@ -14,8 +14,8 @@ export interface Corridor {
 
 const ROW_Y = [-1.25, 0.85, 2.95];
 const CARD_H = 1.8;
-const CARD_LEN = 3.0;
-const PITCH = 3.4;
+const CARD_LEN = 3.2; // 16:9 with CARD_H
+const PITCH = 3.45;
 const WALL = 4.6;
 const FLOOR_Y = -2.3;
 const CEIL_Y = 5.6;
@@ -220,8 +220,8 @@ export function createCorridor(
   // ---- geometry: wall cards ------------------------------------------------
   const verts: number[] = [];
   const idx: number[] = [];
-  const insetU = 3 / (cols * 448);
-  const insetV = 3 / (rows * 280);
+  const insetU = 3 / (cols * 768);
+  const insetV = 3 / (rows * 432);
   let vi = 0;
   const hash = (a: number, b: number, c: number) => {
     let h = (a * 73856093) ^ (b * 19349663) ^ (c * 83492791);

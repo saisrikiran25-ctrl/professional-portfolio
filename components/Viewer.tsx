@@ -128,7 +128,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
             </div>
           ) : (
             <div className="viewer__card">
-              <canvas ref={canvasRef} width={896} height={560} aria-hidden="true" />
+              <canvas ref={canvasRef} width={896} height={504} aria-hidden="true" />
               <ArtText item={item} pill={false} />
             </div>
           )}

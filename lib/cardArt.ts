@@ -6,7 +6,7 @@ import { Item, KIND_LABEL, rgb } from './items';
  *  the hero card and the viewer. */
 
 export const CARD_W = 448;
-export const CARD_H = 280;
+export const CARD_H = 252; // 16:9, the shape of the poster artwork
 
 export const FONT_DISPLAY = '"Unbounded Variable", "Hanken Grotesk Variable", system-ui, sans-serif';
 export const FONT_BODY = '"Hanken Grotesk Variable", system-ui, sans-serif';
@@ -63,38 +63,30 @@ export function loadThumbs(items: Item[]): Promise<void> {
 }
 
 /**
- * Poster art, shown whole. It is never cropped: the picture is fitted inside the box and,
- * when the box has a different shape, the leftover bands are filled with a soft, darkened
- * blur of the same picture so nothing looks letterboxed. The artwork carries its own title,
- * so no text is drawn over it.
+ * Poster art. Every card frame in the site is 16:9, the shape of the artwork itself, so the
+ * picture fills the frame edge to edge with nothing cropped and nothing added around it.
+ * (If a frame ever differs, the crop is anchored to the left, where the titles sit.)
+ * The artwork carries its own title, so no text is drawn over it.
  */
 function drawThumb(ctx: Ctx, img: HTMLImageElement, w: number, h: number) {
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
+  const ir = iw / ih;
+  const br = w / h;
+  let sw = iw;
+  let sh = ih;
+  let sx = 0;
+  let sy = 0;
+  if (ir > br) {
+    sw = ih * br;
+    sx = (iw - sw) * 0.15;
+  } else if (ir < br) {
+    sh = iw / br;
+    sy = (ih - sh) * 0.4;
+  }
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  if (Math.abs(iw / ih / (w / h) - 1) < 0.02) {
-    ctx.drawImage(img, 0, 0, w, h);
-    return;
-  }
-
-  // ambient fill: a tiny copy stretched over the whole box is a cheap, filter-free blur
-  const tiny = document.createElement('canvas');
-  tiny.width = 32;
-  tiny.height = Math.max(8, Math.round((32 * h) / w));
-  const k = Math.max(tiny.width / iw, tiny.height / ih);
-  const tc = tiny.getContext('2d')!;
-  tc.imageSmoothingQuality = 'high';
-  tc.drawImage(img, (tiny.width - iw * k) / 2, (tiny.height - ih * k) / 2, iw * k, ih * k);
-  ctx.drawImage(tiny, 0, 0, w, h);
-  ctx.fillStyle = 'rgba(6,8,12,0.5)';
-  ctx.fillRect(0, 0, w, h);
-
-  // the picture itself, whole
-  const s = Math.min(w / iw, h / ih);
-  const dw = iw * s;
-  const dh = ih * s;
-  ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
 }
 
 export function drawCardArt(
