@@ -44,7 +44,7 @@ const Intro: React.FC = () => {
     <div className="wrap">
       <div ref={ref} className="intro reveal">
         <div className="intro__copy">
-          <Eyebrow>EST. 2026 · MUMBAI &amp; KAKINADA</Eyebrow>
+          <Eyebrow>01 — About · Mumbai &amp; Kakinada</Eyebrow>
           <h2 className="display display--xl"><Split>
             BUILT BY
             <br />

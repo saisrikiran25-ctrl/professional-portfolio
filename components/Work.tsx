@@ -125,7 +125,7 @@ const Work: React.FC = () => {
     <section id="work" className="work">
       <div className="wrap">
         <div ref={introRef} className="work__intro reveal">
-          <Eyebrow>01 — System Curriculum</Eyebrow>
+          <Eyebrow>02 — System Curriculum</Eyebrow>
           <h2 className="display"><Split>
             FOUR TRACKS.
             <br />

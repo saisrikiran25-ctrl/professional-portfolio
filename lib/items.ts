@@ -199,7 +199,17 @@ export const SECTION_ART: Item[] = [
 ];
 
 /** The five stops of the corridor reel — one flagship per track. */
-export const FEATURED_IDS = ['synthetix', 'aletheia', 'build-pilot', 'smb-agent-os', 'venture-1'];
+export const FEATURED_IDS = [
+  'synthetix',
+  'prompt-foundry',
+  'aletheia',
+  'lexis',
+  'promptboss',
+  'portfolio-forge',
+  'urja-kaushal',
+  'venture-0',
+  'venture-1',
+];
 export const FEATURED: Item[] = FEATURED_IDS.map((id) => ITEM_BY_ID.get(id)!).filter(Boolean);
 
 export const TRACKS: { key: Kind; label: string; short: string }[] = [

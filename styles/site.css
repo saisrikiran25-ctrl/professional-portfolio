@@ -900,7 +900,7 @@ button {
    ===================================================================== */
 .hero {
   position: relative;
-  height: 560vh;
+  height: 780vh; /* scroll room for the nine featured cards */
 }
 .hero__stage {
   position: sticky;
