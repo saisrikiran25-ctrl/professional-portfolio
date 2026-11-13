@@ -2036,18 +2036,39 @@ button {
   text-align: right;
   pointer-events: none;
 }
+.tl__yearbox {
+  display: grid;
+  justify-items: end;
+}
+.tl__yearbox > span {
+  grid-area: 1 / 1;
+}
 .tl__year span {
   display: inline-block;
   font: 700 clamp(48px, 8.5vw, 140px) var(--f-display);
   line-height: 1;
   letter-spacing: -0.06em;
   color: rgba(242, 242, 239, 0.07);
-  animation: year 0.9s var(--ease-out);
+  will-change: transform, opacity;
 }
-@keyframes year {
+.tl__y--in {
+  animation: year-in 1s var(--ease-out) both;
+}
+.tl__y--out {
+  animation: year-out 0.9s var(--ease-out) both;
+}
+@keyframes year-in {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(calc(var(--dir, 1) * 34px));
+    filter: blur(8px);
+  }
+}
+@keyframes year-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--dir, 1) * -34px));
+    filter: blur(8px);
   }
 }
 .tl__list {

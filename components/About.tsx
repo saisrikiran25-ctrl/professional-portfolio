@@ -307,6 +307,18 @@ const Viz: React.FC<{ timeline: string; details: string[] }> = ({ timeline, deta
 const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
   const listRef = useRef<HTMLOListElement>(null);
   const [cur, setCur] = useState(0);
+  // the year crossfades: the old one drifts out while the new one drifts in, in the scroll direction
+  const prevCur = useRef(0);
+  const [dir, setDir] = useState(1);
+  const [leaving, setLeaving] = useState<{ idx: number; k: number } | null>(null);
+  useEffect(() => {
+    if (cur === prevCur.current) return;
+    setDir(cur > prevCur.current ? 1 : -1);
+    setLeaving({ idx: prevCur.current, k: Date.now() });
+    prevCur.current = cur;
+    const t = setTimeout(() => setLeaving(null), 1000);
+    return () => clearTimeout(t);
+  }, [cur]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -341,8 +353,17 @@ const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
 
   return (
     <div className="tl">
-      <div className="tl__year" aria-hidden="true">
-        <span key={cur}>{entries[cur]?.year}</span>
+      <div className="tl__year" aria-hidden="true" style={{ ['--dir' as string]: dir }}>
+        <div className="tl__yearbox">
+          {leaving && (
+            <span key={`out${leaving.k}`} className="tl__y tl__y--out">
+              {entries[leaving.idx]?.year}
+            </span>
+          )}
+          <span key={`in${cur}`} className="tl__y tl__y--in">
+            {entries[cur]?.year}
+          </span>
+        </div>
       </div>
       <ol className="tl__list" ref={listRef}>
         {entries.map((e, i) => (
