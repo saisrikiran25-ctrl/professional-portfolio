@@ -9,18 +9,181 @@ import { prefersReducedMotion, startScroll, stopScroll } from '../lib/scroll';
 /* Preloader                                                           */
 /* ------------------------------------------------------------------ */
 
+const PRE_TICKS = 120;
+const PRE_LABELS: [number, string][] = [
+  [0, 'WAKING UP'],
+  [28, 'LOADING SIGNALS'],
+  [58, 'CALIBRATING'],
+  [86, 'TUNING IN'],
+  [100, 'READY'],
+];
+
+/**
+ * The intro "charge-up". A ring of ticks fills clockwise to 100% with a live counter, a bolt
+ * and changing status words. Progress follows the real asset loading (it creeps toward ~88%
+ * while loading, then completes) but never finishes too quickly to be seen. At 100% it flashes
+ * and an iris closes toward the centre, revealing the dial.
+ */
 export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
+  const [leaving, setLeaving] = useState(false);
   const [gone, setGone] = useState(false);
+  const ringRef = useRef<HTMLCanvasElement>(null);
+  const numRef = useRef<HTMLSpanElement>(null);
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const barRef = useRef<HTMLElement>(null);
+  const doneRef = useRef(done);
+  doneRef.current = done;
+
   useEffect(() => {
-    if (!done) return;
-    const t = setTimeout(() => setGone(true), 900);
+    const cv = ringRef.current;
+    if (!cv) return;
+    const ctx = cv.getContext('2d')!;
+    const reduced = prefersReducedMotion();
+    const start = performance.now();
+    let pct = 0;
+    let raf = 0;
+    let finished = false;
+    let lastLabel = '';
+    let timer = 0;
+
+    const size = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const w = cv.clientWidth || 400;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(w * dpr);
+      return { w, dpr };
+    };
+    let { w, dpr } = size();
+    const onResize = () => ({ w, dpr } = size());
+    window.addEventListener('resize', onResize);
+
+    const draw = (t: number) => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, w);
+      const c = w / 2;
+      const R = w * 0.37;
+      const TAU = Math.PI * 2;
+      const lead = (pct / 100) * PRE_TICKS;
+
+      // glow riding the leading edge
+      if (!finished || pct < 100) {
+        const la = (lead / PRE_TICKS) * TAU - Math.PI / 2;
+        const g = ctx.createRadialGradient(c + Math.cos(la) * R, c + Math.sin(la) * R, 0, c + Math.cos(la) * R, c + Math.sin(la) * R, w * 0.18);
+        g.addColorStop(0, 'rgba(251,94,40,0.32)');
+        g.addColorStop(1, 'rgba(251,94,40,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, w);
+      }
+
+      // inner hairline ring
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(c, c, R * 0.84, 0, TAU);
+      ctx.stroke();
+
+      ctx.lineCap = 'round';
+      for (let j = 0; j < PRE_TICKS; j++) {
+        const a = (j / PRE_TICKS) * TAU - Math.PI / 2;
+        const major = j % 10 === 0;
+        const lit = j < lead;
+        const dist = lead - j; // how far behind the leading edge
+        let len = major ? 16 : 9;
+        let alpha = major ? 0.34 : 0.16;
+        let rgb = '255,255,255';
+        if (lit) {
+          const shimmer = Math.sin(t * 7 - j * 0.35) * 0.5 + 0.5;
+          len += 3 + shimmer * 2.5 + Math.max(0, 6 - dist) * 1.2;
+          alpha = 0.55 + 0.45 * Math.min(1, 1 - dist / PRE_TICKS * 0.4);
+          const k = Math.min(1, dist / 14);
+          // the freshest ticks are white-hot, settling to orange behind the edge
+          rgb = `255,${Math.round(255 - k * 161)},${Math.round(255 - k * 215)}`;
+        }
+        if (pct >= 100) {
+          rgb = '255,255,255';
+          alpha = 1;
+          len += 4;
+        }
+        const ca = Math.cos(a);
+        const sa = Math.sin(a);
+        ctx.strokeStyle = `rgba(${rgb},${alpha})`;
+        ctx.lineWidth = major ? 2 : 1.4;
+        ctx.beginPath();
+        ctx.moveTo(c + ca * R, c + sa * R);
+        ctx.lineTo(c + ca * (R + len), c + sa * (R + len));
+        ctx.stroke();
+      }
+    };
+
+    const frame = (now: number) => {
+      raf = requestAnimationFrame(frame);
+      const t = (now - start) / 1000;
+      // creep toward ~88% while loading; once loaded (and shown for a moment) charge to 100
+      const ready = doneRef.current && t > 1.9;
+      const target = ready ? 100 : Math.min(88, 10 + t * 38);
+      pct += (target - pct) * (ready ? 0.085 : 0.07);
+      if (ready && pct > 99.3) pct = 100;
+      if (reduced) pct = ready ? 100 : Math.min(88, pct);
+
+      draw(t);
+      const shown = Math.floor(pct);
+      if (numRef.current) numRef.current.textContent = String(shown);
+      if (barRef.current) barRef.current.style.transform = `scaleX(${pct / 100})`;
+      if (labelRef.current) {
+        let l = PRE_LABELS[0][1];
+        for (const [from, text] of PRE_LABELS) if (pct >= from) l = text;
+        if (l !== lastLabel) {
+          lastLabel = l;
+          labelRef.current.textContent = l;
+        }
+      }
+      if (pct >= 100 && !finished) {
+        finished = true;
+        cancelAnimationFrame(raf);
+        draw(t);
+        timer = window.setTimeout(() => setLeaving(true), 420);
+      }
+    };
+    raf = requestAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!leaving) return;
+    const t = setTimeout(() => setGone(true), 1100);
     return () => clearTimeout(t);
-  }, [done]);
+  }, [leaving]);
+
   if (gone) return null;
   return (
-    <div className={`preloader ${done ? 'is-done' : ''}`} role="status" aria-label="Loading">
-      <span className="preloader__ring" />
-      <span className="preloader__dot" />
+    <div className={`pre ${leaving ? 'is-leaving' : ''}`} role="status" aria-label="Loading">
+      <div className="pre__veil" />
+      <div className="pre__hud pre__hud--l">
+        <b>SAI SRIKIRAN J</b>
+      </div>
+      <div className="pre__hud pre__hud--r">EST. 2026</div>
+      <div className="pre__core">
+        <canvas ref={ringRef} className="pre__ring" aria-hidden="true" />
+        <div className="pre__center">
+          <svg className="pre__bolt" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M13.5 2 5 13.5h6L10 22l9-12h-6.2L13.5 2Z" fill="currentColor" />
+          </svg>
+          <div className="pre__num">
+            <span ref={numRef}>0</span>
+            <small>%</small>
+          </div>
+          <p className="pre__label" ref={labelRef}>
+            WAKING UP
+          </p>
+        </div>
+      </div>
+      <div className="pre__bar">
+        <i ref={barRef} />
+      </div>
     </div>
   );
 };
