@@ -1112,6 +1112,7 @@ button {
   display: block;
   width: min(560px, 70vw);
   aspect-ratio: 448 / 280;
+  container-type: size;
   border-radius: var(--r);
   overflow: hidden;
   background: #0b0e14;
@@ -1259,7 +1260,7 @@ button {
   .work__grid {
     align-items: center;
     padding-bottom: 0;
-    padding-top: 84px;
+    padding-top: 70px;
   }
 }
 @media (max-width: 999px) {
@@ -1401,7 +1402,8 @@ button {
 .preview {
   --c: 251, 94, 40;
   position: relative;
-  height: clamp(170px, 31vh, 400px);
+  height: clamp(230px, 38vh, 430px);
+  container-type: size;
   border-radius: var(--r);
   overflow: hidden;
   background: #0b0e14;
@@ -1427,7 +1429,7 @@ button {
 }
 
 .detail {
-  padding-top: clamp(20px, 2.4vw, 32px);
+  padding-top: clamp(24px, 2.8vw, 38px);
   max-width: 46rem;
   animation: rise 0.7s var(--ease-out);
 }
@@ -1506,7 +1508,7 @@ button {
     padding-bottom: 6px;
   }
   .preview {
-    height: clamp(150px, 27vh, 300px);
+    height: clamp(212px, 36vh, 340px);
   }
   .detail__desc {
     font-size: 14px;
@@ -3073,7 +3075,7 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(16px, 2.2vw, 26px) clamp(18px, 2.4vw, 30px) clamp(78px, 7vw, 92px);
+  padding: clamp(18px, 2.4vw, 28px) clamp(20px, 2.6vw, 32px) clamp(86px, 7.4vw, 100px);
   pointer-events: none;
   animation: arttext-in 0.9s var(--ease-out) 0.25s both;
 }
@@ -3099,8 +3101,8 @@ button {
 }
 .arttext__title {
   margin: 0;
-  font: 600 clamp(24px, 3.4vw, 46px) var(--f-display);
-  line-height: 1.08;
+  font: 600 clamp(22px, min(13cqh, 8cqw), 46px) var(--f-display);
+  line-height: 1.1;
   letter-spacing: -0.04em;
   color: #f2f2ef;
   text-wrap: balance;
@@ -3109,8 +3111,8 @@ button {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 18px;
-  margin: clamp(10px, 1.2vw, 16px) 0 0;
+  gap: 6px 20px;
+  margin: 16px 0 0;
   font: 500 clamp(11px, 0.95vw, 13px) var(--f-body);
   color: rgba(242, 242, 239, 0.62);
 }
@@ -3138,6 +3140,7 @@ button {
 }
 .viewer__card {
   position: relative;
+  container-type: inline-size;
   width: 100%;
   border-radius: var(--r);
   overflow: hidden;
