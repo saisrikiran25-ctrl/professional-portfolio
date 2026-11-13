@@ -209,7 +209,7 @@ const Work: React.FC = () => {
               <div className="preview" style={{ ['--c' as string]: item.color.join(',') }}>
                 <div className="preview__stage">
                   <canvas ref={canvasRef} className="preview__canvas" aria-hidden="true" />
-                  <ArtText item={item} key={item.id} pill={false} />
+                  <ArtText item={item} key={item.id} pill={false} generated />
                   <button
                     type="button"
                     className="round preview__go"

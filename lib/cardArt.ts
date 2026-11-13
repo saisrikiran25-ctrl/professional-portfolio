@@ -98,7 +98,9 @@ export function drawCardArt(
   /** px (in art units) kept clear at the bottom for an overlaid title pill */
   reserve = 70,
   /** false: graphics only (the words are real DOM text laid over the canvas) */
-  text = true
+  text = true,
+  /** false: always draw the generated art, even for items that have a poster */
+  poster = true
 ) {
   const w = W;
   const h = H;
@@ -106,9 +108,9 @@ export function drawCardArt(
   ctx.save();
   ctx.scale(scale, scale);
 
-  const poster = item.thumb ? THUMBS.get(item.id) : undefined;
-  if (poster) {
-    drawThumb(ctx, poster, w, h);
+  const art = poster && item.thumb ? THUMBS.get(item.id) : undefined;
+  if (art) {
+    drawThumb(ctx, art, w, h);
     ctx.restore();
     return;
   }

@@ -1431,7 +1431,7 @@ button {
 }
 
 .detail {
-  padding-top: clamp(24px, 2.8vw, 38px);
+  padding-top: clamp(30px, 3.2vw, 44px);
   max-width: 46rem;
   animation: rise 0.7s var(--ease-out);
 }
@@ -1513,22 +1513,22 @@ button {
     height: clamp(212px, 36vh, 340px);
   }
   .detail {
-    padding-top: 10px;
+    padding-top: 28px;
   }
   .detail__desc {
-    margin-top: 6px;
+    margin-top: 10px;
     font-size: 13.5px;
-    line-height: 1.45;
+    line-height: 1.5;
   }
   .detail__cols {
-    margin: 8px 0 6px;
+    margin: 12px 0 10px;
   }
   .detail__cols h4 {
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
   .detail__cols li,
   .detail__cols p {
-    line-height: 1.4;
+    line-height: 1.5;
   }
 }
 
