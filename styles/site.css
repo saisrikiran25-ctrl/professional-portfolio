@@ -1402,7 +1402,7 @@ button {
 .preview {
   --c: 251, 94, 40;
   position: relative;
-  height: clamp(230px, 38vh, 430px);
+  height: clamp(280px, 47vh, 540px);
   container-type: size;
   border-radius: var(--r);
   overflow: hidden;
@@ -1426,6 +1426,24 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+/* poster art is shown whole: the title chip and button sit in a strip beneath it,
+   never over the picture */
+.preview--poster {
+  display: flex;
+  flex-direction: column;
+}
+.preview--poster .preview__canvas {
+  position: relative;
+  inset: auto;
+  flex: 1 1 0;
+  min-height: 0;
+  height: auto;
+}
+.preview--poster .preview__bar {
+  position: static;
+  flex: none;
+  padding: 10px 14px 12px;
 }
 
 .detail {

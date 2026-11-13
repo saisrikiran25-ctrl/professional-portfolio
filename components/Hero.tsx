@@ -656,10 +656,12 @@ const Hero: React.FC = () => {
               <canvas ref={imgA} className={`reel__img ${front === 0 ? 'is-front' : ''}`} width={896} height={560} aria-hidden="true" />
               <canvas ref={imgB} className={`reel__img ${front === 1 ? 'is-front' : ''}`} width={896} height={560} aria-hidden="true" />
               <ArtText item={item} key={`t${item.id}`} />
-              <span className="reel__chip" key={item.id}>
-                <b>{item.title}</b>
-                <i>{KIND_LABEL[item.kind]}</i>
-              </span>
+              {!item.thumb && (
+                <span className="reel__chip" key={item.id}>
+                  <b>{item.title}</b>
+                  <i>{KIND_LABEL[item.kind]}</i>
+                </span>
+              )}
               <span className="reel__play" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                   <path d="M8 5.5v13l11-6.5z" fill="currentColor" />

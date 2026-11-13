@@ -111,21 +111,6 @@ export const projects: Project[] = [
     status: 'Live'
   },
   {
-    id: 'decision-simulator',
-    title: 'Decision Simulator',
-    category: 'WRAPPER',
-    description: 'Interactive decision simulator for exploring business scenarios, comparing assumptions and evaluating strategic trade-offs. The demo stress-tests a ₹25 crore, 36-month cloud transformation proposal before the Board does.',
-    techStack: ['Scenario Simulator', 'Jarvis AI Advisor', 'Interactive Dashboards'],
-    features: [
-      'Stress-Test Assumptions',
-      'Ask Jarvis (AI Advisor)',
-      'Board Decision Framing',
-      'Illustrative Scenarios'
-    ],
-    link: 'https://saisrikiran25-ctrl.github.io/decision-simulator/',
-    status: 'Live'
-  },
-  {
     id: 'sop-builder',
     title: 'SOP Builder',
     category: 'WRAPPER',
@@ -253,6 +238,22 @@ export const academicWork: Project[] = [
       'A five-question quiz scored on accuracy and speed, with a live leaderboard',
     ],
     link: 'https://3tierarchitecture.vercel.app/',
+    status: 'Live',
+  },
+  {
+    id: 'decision-simulator',
+    title: 'Decision Simulator',
+    category: 'ACADEMIC',
+    description:
+      'An interactive decision simulator for exploring business scenarios, comparing assumptions and weighing strategic trade-offs. The case stress-tests a ₹25 crore, 36-month cloud transformation proposal for a fictional IT services firm before the Board does.',
+    techStack: ['Scenario Simulator', 'Jarvis AI Advisor', 'Interactive Dashboards'],
+    features: [
+      'Stress-test the proposal: simulate the transformation and its assumptions',
+      'Ask Jarvis, a built-in AI advisor, to go deeper on any idea',
+      'Four Board decisions framed across three migration waves',
+      'All figures are illustrative assumptions',
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/decision-simulator/',
     status: 'Live',
   },
 ];

@@ -40,9 +40,8 @@ function ellipsize(ctx: Ctx, text: string, maxW: number) {
   return t + '…';
 }
 
-/** Poster frames for items that have a demo video, filled in by loadThumbs(). */
+/** Poster art for items that have a demo video, filled in by loadThumbs(). */
 export const THUMBS = new Map<string, HTMLImageElement>();
-const LIGHT_THUMBS = new Set<string>();
 
 export function loadThumbs(items: Item[]): Promise<void> {
   const jobs = items
@@ -54,19 +53,6 @@ export function loadThumbs(items: Item[]): Promise<void> {
           img.decoding = 'async';
           img.onload = () => {
             THUMBS.set(i.id, img);
-            // light artwork (white editorial covers) looks muddy under a dark shade
-            try {
-              const s = document.createElement('canvas');
-              s.width = s.height = 8;
-              const c = s.getContext('2d')!;
-              c.drawImage(img, 0, 0, 8, 8);
-              const d = c.getImageData(0, 0, 8, 8).data;
-              let l = 0;
-              for (let p = 0; p < d.length; p += 4) l += (d[p] * 0.2126 + d[p + 1] * 0.7152 + d[p + 2] * 0.0722) / 255;
-              if (l / 64 > 0.7) LIGHT_THUMBS.add(i.id);
-            } catch {
-              /* keep the default shade */
-            }
             resolve();
           };
           img.onerror = () => resolve(); // fall back to the generated art
@@ -76,52 +62,39 @@ export function loadThumbs(items: Item[]): Promise<void> {
   return Promise.all(jobs).then(() => undefined);
 }
 
-/** A real frame from the demo, cover-fitted, with a soft shade at the foot for the title pill. */
-function drawThumb(ctx: Ctx, img: HTMLImageElement, item: Item, w: number, h: number, text: boolean) {
-  const ir = img.naturalWidth / img.naturalHeight;
-  const br = w / h;
-  let sw = img.naturalWidth;
-  let sh = img.naturalHeight;
-  let sx = 0;
-  let sy = 0;
-  if (ir > br) {
-    sw = sh * br;
-    sx = (img.naturalWidth - sw) / 2;
-  } else {
-    sh = sw / br;
-    sy = (img.naturalHeight - sh) * 0.5;
-  }
+/**
+ * Poster art, shown whole. It is never cropped: the picture is fitted inside the box and,
+ * when the box has a different shape, the leftover bands are filled with a soft, darkened
+ * blur of the same picture so nothing looks letterboxed. The artwork carries its own title,
+ * so no text is drawn over it.
+ */
+function drawThumb(ctx: Ctx, img: HTMLImageElement, w: number, h: number) {
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-
-  const light = LIGHT_THUMBS.has(item.id);
-  if (!light) {
-    const shade = ctx.createLinearGradient(0, h * 0.5, 0, h);
-    shade.addColorStop(0, 'rgba(6,8,12,0)');
-    shade.addColorStop(1, 'rgba(6,8,12,0.72)');
-    ctx.fillStyle = shade;
-    ctx.fillRect(0, h * 0.5, w, h * 0.5);
+  if (Math.abs(iw / ih / (w / h) - 1) < 0.02) {
+    ctx.drawImage(img, 0, 0, w, h);
+    return;
   }
 
-  if (!text) return;
-  if (light) return; // the artwork already carries its own title
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.font = `600 11px ${FONT_BODY}`;
-  setSpacing(ctx, 2);
-  ctx.fillStyle = rgb(item.color, 1);
-  ctx.shadowColor = 'rgba(0,0,0,0.7)';
-  ctx.shadowBlur = 6;
-  ctx.fillText(`${(item.kicker ?? KIND_LABEL[item.kind]).toUpperCase()}  ·  ${String(item.n).padStart(2, '0')}`, 20, 26);
-  setSpacing(ctx, 0);
-  ctx.font = `600 24px ${FONT_DISPLAY}`;
-  setSpacing(ctx, -0.7);
-  ctx.fillStyle = '#f2f2ef';
-  ctx.textBaseline = 'alphabetic';
-  ctx.fillText(ellipsize(ctx, item.title, w - 40), 20, h - 22);
-  setSpacing(ctx, 0);
-  ctx.shadowBlur = 0;
+  // ambient fill: a tiny copy stretched over the whole box is a cheap, filter-free blur
+  const tiny = document.createElement('canvas');
+  tiny.width = 32;
+  tiny.height = Math.max(8, Math.round((32 * h) / w));
+  const k = Math.max(tiny.width / iw, tiny.height / ih);
+  const tc = tiny.getContext('2d')!;
+  tc.imageSmoothingQuality = 'high';
+  tc.drawImage(img, (tiny.width - iw * k) / 2, (tiny.height - ih * k) / 2, iw * k, ih * k);
+  ctx.drawImage(tiny, 0, 0, w, h);
+  ctx.fillStyle = 'rgba(6,8,12,0.5)';
+  ctx.fillRect(0, 0, w, h);
+
+  // the picture itself, whole
+  const s = Math.min(w / iw, h / ih);
+  const dw = iw * s;
+  const dh = ih * s;
+  ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
 }
 
 export function drawCardArt(
@@ -143,7 +116,7 @@ export function drawCardArt(
 
   const poster = item.thumb ? THUMBS.get(item.id) : undefined;
   if (poster) {
-    drawThumb(ctx, poster, item, w, h, text);
+    drawThumb(ctx, poster, w, h);
     ctx.restore();
     return;
   }

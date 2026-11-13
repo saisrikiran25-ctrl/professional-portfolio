@@ -206,7 +206,7 @@ const Work: React.FC = () => {
             </div>
 
             <div className="work__right">
-              <div className="preview" style={{ ['--c' as string]: item.color.join(',') }}>
+              <div className={`preview ${item.thumb ? 'preview--poster' : ''}`} style={{ ['--c' as string]: item.color.join(',') }}>
                 <canvas ref={canvasRef} className="preview__canvas" aria-hidden="true" />
                 <ArtText item={item} key={item.id} />
                 <div className="preview__bar">
