@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Pause, Play, Volume2, VolumeX, X } from 'lucide-react';
 import { ITEMS, ITEM_BY_ID, KIND_LABEL, rgb } from '../lib/items';
 import { sound } from '../lib/audio';
 import { startScroll, stopScroll } from '../lib/scroll';
@@ -8,6 +8,7 @@ import ArtText from './ArtText';
 import { useUI } from '../lib/ui';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+const clock = (s: number) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00');
 
 interface ViewerProps {
   id: string | null;
@@ -21,6 +22,17 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [vs, setVs] = useState({ playing: false, t: 0, d: 0, muted: false });
+  const sync = () => {
+    const v = videoRef.current;
+    if (v) setVs({ playing: !v.paused && !v.ended, t: v.currentTime, d: v.duration || 0, muted: v.muted || v.volume === 0 });
+  };
+  const toggle = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused || v.ended) v.play().catch(() => {});
+    else v.pause();
+  };
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<Element | null>(null);
 
@@ -89,6 +101,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
   // always hand the sound back to the page when it changes or closes
   useEffect(() => {
     if (!item?.video) return;
+    setVs({ playing: false, t: 0, d: 0, muted: false });
     videoRef.current?.play().catch(() => {});
     return () => sound.duck(false);
   }, [item?.id, item?.video]);
@@ -117,14 +130,67 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
                 ref={videoRef}
                 src={item.video}
                 poster={item.poster ?? item.thumb}
-                controls
                 playsInline
                 preload="metadata"
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
                 aria-label={`${item.title} product demo`}
-                onPlay={() => sound.duck(true)}
-                onPause={() => sound.duck(false)}
-                onEnded={() => sound.duck(false)}
+                onClick={toggle}
+                onPlay={() => {
+                  sound.duck(true);
+                  sync();
+                }}
+                onPause={() => {
+                  sound.duck(false);
+                  sync();
+                }}
+                onEnded={() => {
+                  sound.duck(false);
+                  sync();
+                }}
+                onTimeUpdate={sync}
+                onLoadedMetadata={sync}
+                onVolumeChange={sync}
               />
+              <div className="vbar">
+                <button type="button" className="vbar__btn" onClick={toggle} aria-label={vs.playing ? 'Pause' : 'Play'}>
+                  {vs.playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                </button>
+                <span className="vbar__time">
+                  {clock(vs.t)} / {clock(vs.d)}
+                </span>
+                <input
+                  className="vbar__seek"
+                  type="range"
+                  min={0}
+                  max={vs.d || 1}
+                  step={0.1}
+                  value={vs.t}
+                  aria-label="Seek"
+                  style={{ ['--p' as string]: `${vs.d ? (vs.t / vs.d) * 100 : 0}%` }}
+                  onChange={(e) => {
+                    const v = videoRef.current;
+                    if (v) {
+                      v.currentTime = Number(e.target.value);
+                      sync();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="vbar__btn"
+                  onClick={() => {
+                    const v = videoRef.current;
+                    if (v) {
+                      v.muted = !v.muted;
+                      sync();
+                    }
+                  }}
+                  aria-label={vs.muted ? 'Unmute' : 'Mute'}
+                >
+                  {vs.muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+                </button>
+              </div>
             </div>
           ) : (
             <div className="viewer__card">

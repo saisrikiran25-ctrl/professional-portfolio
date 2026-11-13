@@ -19,7 +19,7 @@ const heroReels = [
   {
     title: 'PROMPT ENGINEERING & SYSTEMS',
     tag: 'PRECISION · 02',
-    desc: 'Top 250 Global Creator on PromptBase with 600+ developed business prompts and structured reasoning chains.',
+    desc: 'Top 200 Global Creator on PromptBase (ranked #193) with 600+ developed business prompts and structured reasoning chains.',
   },
   {
     title: 'STUDENT VENTURES & EXPERIMENTS',
@@ -139,7 +139,7 @@ const facts = [
   { v: '600+', l: 'Business Prompts for Sale' },
   { v: '10+', l: 'SaaS Deployed' },
   { v: '6+', l: 'Custom Gems & GPTs' },
-  { v: '#250', l: 'PromptBase Global Rank' },
+  { v: '#193', l: 'PromptBase Global Rank' },
 ];
 
 const Count: React.FC<{ value: string }> = ({ value }) => {

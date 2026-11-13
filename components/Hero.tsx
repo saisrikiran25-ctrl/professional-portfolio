@@ -113,14 +113,6 @@ function paintBackdrop(
   g.addColorStop(1, 'rgba(8,11,17,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
-
-  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-  ctx.lineWidth = 1;
-  for (const k of [1.32, 1.72]) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * k, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 /** The part that moves every frame: a living instrument ring. Idle it breathes and a scanner
