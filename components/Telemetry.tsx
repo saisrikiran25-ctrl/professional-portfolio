@@ -1,10 +1,37 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { caseStudies } from '../lib/stories';
+import { ITEM_BY_ID } from '../lib/items';
+import { paintArtTo } from '../lib/cardArt';
+import { useUI } from '../lib/ui';
+import ArtText from './ArtText';
 import { useReveal } from '../lib/hooks';
 import { sound } from '../lib/audio';
 import { Arrow, Eyebrow, Split } from './Bits';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+/** The project's 16:9 artwork; projects without a poster get their generated card. */
+const CaseMedia: React.FC<{ id: string; title: string }> = ({ id, title }) => {
+  const { assets } = useUI();
+  const item = ITEM_BY_ID.get(id);
+  const cv = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = cv.current;
+    if (!c || !item || item.thumb || !assets) return;
+    const draw = () => paintArtTo(c, item, 0, false);
+    draw();
+    const ro = new ResizeObserver(draw);
+    ro.observe(c);
+    return () => ro.disconnect();
+  }, [item, assets]);
+  if (item?.thumb) return <img src={item.thumb} alt={title} loading="lazy" decoding="async" draggable={false} />;
+  return (
+    <>
+      <canvas ref={cv} className="case__canvas" width={896} height={504} aria-hidden="true" />
+      {item && <ArtText item={item} pill={false} generated />}
+    </>
+  );
+};
 
 /** 03 — System Telemetry: a drag / swipe / keyboard strip of the case studies. */
 const Telemetry: React.FC = () => {
@@ -133,18 +160,17 @@ const Telemetry: React.FC = () => {
                 aria-label={`${i + 1} of ${caseStudies.length}`}
               >
                 <div className="case__media">
-                  <img src={s.image} alt={s.title} loading="lazy" decoding="async" draggable={false} />
-                  <span className="case__badge">{s.badge}</span>
-                  <span className="case__tag">{s.tag}</span>
-                  <div className="case__bar">
-                    <span className="chip">
-                      <b>{s.title}</b>
-                      <i>{s.category}</i>
-                    </span>
-                    <em>{s.status}</em>
-                  </div>
+                  <CaseMedia id={s.ref} title={s.title} />
                 </div>
                 <div className="case__body">
+                  <div className="case__meta">
+                    <span className="case__badge">{s.badge}</span>
+                    <span className="case__tag">{s.tag}</span>
+                    <em>{s.status}</em>
+                  </div>
+                  <h3 className="case__title">
+                    {s.title} <small>{s.category}</small>
+                  </h3>
                   <p className="case__quote">{s.quote}</p>
                   <dl className="case__stats">
                     {s.stats.map((st) => (

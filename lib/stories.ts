@@ -9,7 +9,11 @@ export interface CaseStudy {
   category: string;
   quote: string;
   stats: { label: string; value: string; unit?: string }[];
-  image: string;
+  /** the project (lib/items id) whose artwork this card shows */
+  ref: string;
+  /** only in the Telemetry strip, not a separate item elsewhere */
+  extra?: boolean;
+  image?: string;
   link: string;
   status: string;
 }
@@ -17,6 +21,7 @@ export interface CaseStudy {
 export const caseStudies: CaseStudy[] = [
   {
     id: 'case-synthetix',
+    ref: 'synthetix',
     badge: 'FLAGSHIP · 01',
     tag: 'VISUAL LOGIC',
     title: 'SYNTHETIX',
@@ -33,6 +38,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'case-agentguard',
+    ref: 'venture-1',
     badge: 'VENTURE · 02',
     tag: 'AGENT HYPERVISOR',
     title: 'AGENTGUARD',
@@ -49,6 +55,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'case-ai-landscape',
+    ref: 'venture-0',
     badge: 'STARTUP · 03',
     tag: 'AI FIELD GUIDE',
     title: 'THE AI LANDSCAPE',
@@ -65,6 +72,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'case-portfolioforge',
+    ref: 'portfolio-forge',
     badge: 'BUILDER · 04',
     tag: 'SITE GENERATOR',
     title: 'PORTFOLIO FORGE',
@@ -81,6 +89,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'case-lexis',
+    ref: 'lexis',
     badge: 'LEGAL · 05',
     tag: 'POLICY ANALYZER',
     title: 'LEXIS',
@@ -97,6 +106,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'case-contentaccel',
+    ref: 'contentaccel',
     badge: 'PLATFORM · 06',
     tag: 'CONTENT ENGINE',
     title: 'CONTENTACCEL',
@@ -109,6 +119,57 @@ export const caseStudies: CaseStudy[] = [
     ],
     image: `${import.meta.env.BASE_URL}covers/contentaccel.svg`,
     link: 'https://saisrikiran25-ctrl.github.io/content-accelerator/',
+    status: 'Live System'
+  },
+  {
+    id: 'case-prompt-foundry',
+    ref: 'prompt-foundry',
+    extra: true,
+    badge: 'MARKETPLACE · 07',
+    tag: 'PROMPT STORE',
+    title: 'PROMPT FOUNDRY',
+    category: 'Expert AI Prompt Marketplace',
+    quote: '"A premium marketplace for expert-grade AI prompts, combining Amazon-style discovery with boutique specialization."',
+    stats: [
+      { label: 'Payments', value: 'UPI', unit: 'CHECKOUT' },
+      { label: 'Backend', value: 'FIREBASE', unit: 'CLOUD' },
+      { label: 'Catalog', value: 'LIVE', unit: 'MARKETPLACE' }
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/prompt-foundry/',
+    status: 'Live System'
+  },
+  {
+    id: 'case-aletheia',
+    ref: 'aletheia',
+    extra: true,
+    badge: 'INTELLIGENCE · 08',
+    tag: 'FOUNDER TERMINAL',
+    title: 'ALETHEIA',
+    category: 'Zero-to-One Intelligence Terminal',
+    quote: '"A Consensus Map, a Dialectic Engine and a Monopoly Discovery Pane that help founders find the market blindspots everyone else has agreed to ignore."',
+    stats: [
+      { label: 'Panes', value: '3', unit: 'INTELLIGENCE' },
+      { label: 'Lens', value: 'CONSENSUS', unit: 'MAP' },
+      { label: 'Engine', value: 'DIALECTIC' }
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/aletheia-intelligence-terminal/',
+    status: 'Beta'
+  },
+  {
+    id: 'case-promptboss',
+    ref: 'promptboss',
+    extra: true,
+    badge: 'PROMPTING · 09',
+    tag: 'PROMPT REFINER',
+    title: 'PROMPTBOSS',
+    category: 'AI Prompt Refinement Tool',
+    quote: '"Diagnoses a prompt, identifies what is missing, and rebuilds it for the chosen task type, output style, tone and target model."',
+    stats: [
+      { label: 'Task Types', value: '12' },
+      { label: 'Targeting', value: 'MODEL', unit: 'AWARE' },
+      { label: 'Output', value: 'STREAM', unit: 'LIVE' }
+    ],
+    link: 'https://saisrikiran25-ctrl.github.io/promptboss/',
     status: 'Live System'
   }
 ];

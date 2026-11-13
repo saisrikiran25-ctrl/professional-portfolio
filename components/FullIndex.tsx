@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { projects, worksInProgress } from '../data';
 import { ITEMS, Item, KIND_LABEL } from '../lib/items';
-import { caseStudies } from '../lib/stories';
 import { sound } from '../lib/audio';
 import { clamp } from '../lib/hooks';
 import { startScroll, stopScroll } from '../lib/scroll';
@@ -159,7 +158,7 @@ const FullIndex: React.FC<Props> = ({ open, onClose }) => {
   );
 
   const pw = Math.min(R * 1.28, 340);
-  const total = `${projects.length} systems · ${worksInProgress.length} ventures · ${caseStudies.length} case studies`;
+  const total = `${projects.length} systems · ${worksInProgress.length} ventures · ${ITEMS.filter((i) => i.kind === 'CASE').length} case studies`;
 
   return (
     <div className="fi" ref={rootRef} role="dialog" aria-modal="false" aria-label="Full index">
