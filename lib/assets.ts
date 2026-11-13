@@ -28,8 +28,8 @@ export function loadAssets(): Promise<Assets> {
     }
 
     const arts = new Map<string, HTMLCanvasElement>();
-    for (const it of ITEMS) arts.set(it.id, makeArtCanvas(it, 1.5));
-    for (const it of SECTION_ART) arts.set(it.id, makeArtCanvas(it, 1.5));
+    for (const it of ITEMS) arts.set(it.id, makeArtCanvas(it, 2));
+    for (const it of SECTION_ART) arts.set(it.id, makeArtCanvas(it, 2));
 
     const cols = 5;
     const rows = Math.ceil(ITEMS.length / cols);

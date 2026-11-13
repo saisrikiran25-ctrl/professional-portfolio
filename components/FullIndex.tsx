@@ -170,7 +170,7 @@ const FullIndex: React.FC<Props> = ({ open, onClose }) => {
             style={{ left: cx, top: cy, width: pw, height: pw * 0.625 }}
             aria-hidden="true"
           >
-            <canvas ref={prevRef} width={672} height={420} />
+            <canvas ref={prevRef} width={896} height={560} />
           </div>
 
           {placedR.map(({ row, x, y }, i) =>

@@ -4,9 +4,6 @@ import type { Item } from './items';
 
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
-/** Logical design height of the art; width follows the box so the art always fills it. */
-const LOGICAL_H = 280;
-
 /**
  * The project preview. The card art is drawn natively at the shape of its box, so it
  * fills the box edge to edge at any size. When the selection changes the new art
@@ -67,13 +64,11 @@ export class ArtStage {
     const bh = Math.max(2, Math.round(h * dpr));
     this.art.width = bw;
     this.art.height = bh;
-    const scale = bh / LOGICAL_H;
-    const logicalW = bw / scale;
-    // the title pill (~64 css px) sits over the bottom of the box: keep content above it
-    const reserve = (64 * LOGICAL_H) / h;
+    // draw in true CSS pixels (scaled only by devicePixelRatio) so all type stays crisp
     const c = this.art.getContext('2d')!;
     c.clearRect(0, 0, bw, bh);
-    drawCardArt(c, item, scale, logicalW, LOGICAL_H, reserve);
+    // the title pill (~64 css px) sits over the bottom of the box: keep content above it
+    drawCardArt(c, item, dpr, w, h, 64);
   }
 
   setItem(item: Item) {

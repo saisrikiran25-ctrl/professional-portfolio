@@ -98,7 +98,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
         </button>
 
         <div className="viewer__art" key={item.id}>
-          <canvas ref={canvasRef} width={672} height={420} aria-hidden="true" />
+          <canvas ref={canvasRef} width={896} height={560} aria-hidden="true" />
         </div>
 
         <div className="viewer__info" key={`i${item.id}`}>

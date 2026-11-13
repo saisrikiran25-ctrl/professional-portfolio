@@ -111,16 +111,20 @@ export function drawCardArt(
   ctx.fillText(`${(item.kicker ?? KIND_LABEL[item.kind]).toUpperCase()}  ·  ${String(item.n).padStart(2, '0')}`, 24, 30);
   setSpacing(ctx, 0);
 
-  // layout from the bottom up: tags, then status, then the title a clear gap above.
-  // `reserve` keeps everything above the title pill that overlays the bottom of the card.
-  const tagsY = h - reserve - 16;
-  const statusY = tagsY - 26;
-  const titleBase = statusY - 40;
+  // Layout from the bottom up so nothing collides. `reserve` keeps everything above the
+  // title pill that overlays the bottom of the card. Short boxes use a compact layout in
+  // which status and tags share one line; the type stays at a true, legible pixel size.
+  const compact = h < 250;
+  const small = compact ? 12 : 11;
+  const tagsY = h - reserve - (compact ? 14 : 16);
+  const statusY = compact ? tagsY : tagsY - 26;
+  const titleBase = (compact ? tagsY - 30 : statusY - 40);
+  const topLimit = compact ? 48 : 62;
 
-  // title — shrinks only if it would run up into the kicker
+  // title — as large as the box allows, shrinking only if it would run into the kicker
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#f2f2ef';
-  let size = 36;
+  let size = Math.round(Math.max(28, Math.min(54, h * 0.14)));
   let lines: string[] = [];
   const maxW = w - 64;
   for (; size >= 18; size -= 2) {
@@ -128,7 +132,7 @@ export function drawCardArt(
     setSpacing(ctx, -size * 0.03);
     lines = wrap(ctx, item.title, maxW);
     const top = titleBase - (Math.min(lines.length, 2) - 1) * size * 1.12 - size * 0.78;
-    if (lines.length <= 2 && lines.every((l) => ctx.measureText(l).width <= maxW) && top >= 62) break;
+    if (lines.length <= 2 && lines.every((l) => ctx.measureText(l).width <= maxW) && top >= topLimit) break;
   }
   const lh = size * 1.12;
   const shownLines = lines.slice(0, 2);
@@ -137,23 +141,27 @@ export function drawCardArt(
 
   // status
   ctx.textBaseline = 'middle';
-  ctx.font = `500 11px ${FONT_BODY}`;
+  ctx.font = `600 ${small}px ${FONT_BODY}`;
   setSpacing(ctx, 1.2);
   ctx.beginPath();
-  ctx.arc(28, statusY, 3.2, 0, Math.PI * 2);
+  ctx.arc(28, statusY, 3.4, 0, Math.PI * 2);
   ctx.fillStyle = '#34d399';
   ctx.fill();
-  ctx.fillStyle = 'rgba(242,242,239,0.7)';
-  ctx.fillText(item.status.toUpperCase(), 40, statusY + 0.5);
+  ctx.fillStyle = 'rgba(242,242,239,0.82)';
+  const statusText = item.status.toUpperCase();
+  ctx.fillText(statusText, 40, statusY + 0.5);
+  const statusW = ctx.measureText(statusText).width;
   setSpacing(ctx, 0);
 
-  // tags — quiet text, no pills
-  ctx.font = `500 11px ${FONT_BODY}`;
-  ctx.fillStyle = 'rgba(242,242,239,0.46)';
+  // tags — quiet text, no pills (beside the status when compact, below it otherwise)
+  ctx.font = `500 ${small}px ${FONT_BODY}`;
+  ctx.fillStyle = 'rgba(242,242,239,0.6)';
   const shown = item.tags.slice(0, 3);
-  const tagW = Math.max(150, (w - 48) / Math.max(1, shown.length) - 30);
+  const tagX = compact ? 40 + statusW + 22 : 24;
+  const room = w - tagX - 24;
+  const tagW = Math.max(120, room / Math.max(1, shown.length) - 28);
   const tags = shown.map((t) => ellipsize(ctx, t, tagW));
-  ctx.fillText(tags.join('   ·   '), 24, tagsY);
+  ctx.fillText(tags.join('   ·   '), tagX, tagsY);
 
   ctx.restore();
 }
