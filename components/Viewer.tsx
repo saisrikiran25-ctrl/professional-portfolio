@@ -83,6 +83,13 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
 
   if (!item) return null;
 
+  // say the kind once: skip the eyebrow when it only repeats it, but keep a richer one ("VENTURE 01")
+  const kindLabel = KIND_LABEL[item.kind];
+  const eb = item.eyebrow || '';
+  const repeats = !eb || eb.toUpperCase() === item.kind || eb.toUpperCase().startsWith(kindLabel.toUpperCase());
+  const kindMain = repeats && eb.length > kindLabel.length && eb.toUpperCase().startsWith(kindLabel.toUpperCase()) ? eb : kindLabel;
+  const showEyebrow = !repeats;
+
   return (
     <div className="viewer" role="dialog" aria-modal="true" aria-label={item.title} onClick={() => onChange(null)}>
       <div className="viewer__panel" ref={dialogRef} onClick={(e) => e.stopPropagation()} style={{ ['--c' as string]: item.color.join(',') }}>
@@ -96,8 +103,8 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
 
         <div className="viewer__info" key={`i${item.id}`}>
           <p className="detail__meta">
-            <span style={{ color: rgb(item.color) }}>{KIND_LABEL[item.kind]}</span>
-            <span>{item.eyebrow}</span>
+            <span style={{ color: rgb(item.color) }}>{kindMain}</span>
+            {showEyebrow && <span>{item.eyebrow}</span>}
             <span className="status">
               <i /> {item.status}
             </span>
