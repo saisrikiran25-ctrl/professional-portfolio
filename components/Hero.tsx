@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FEATURED, ITEMS, ITEM_BY_ID, KIND_LABEL, SECTION_ART } from '../lib/items';
 import { warpTo } from '../lib/warp';
+import { paintArtTo } from '../lib/cardArt';
 import { createCorridor, CORRIDOR_TRAVEL, Corridor, RGB } from '../lib/scene';
 import { sound } from '../lib/audio';
 import { clamp, lerp, smooth, useSound } from '../lib/hooks';
@@ -250,6 +251,7 @@ const Hero: React.FC = () => {
   const veilRef = useRef<HTMLDivElement>(null);
   const corridorRef = useRef<Corridor | null>(null);
   const frontRef = useRef(0);
+  const activeRef = useRef(0);
 
   const [tuned, setTuned] = useState(false);
   const [R, setR] = useState(260);
@@ -457,18 +459,27 @@ const Hero: React.FC = () => {
 
   // ---- reel card art (cross-fade between two canvases) ---------------------
   useEffect(() => {
-    const art = assets?.arts.get(FEATURED[active].id);
-    if (!art) return;
+    activeRef.current = active;
+    if (!assets) return;
     const next = active === 0 && frontRef.current === 0 && !imgA.current?.dataset.drawn ? 0 : 1 - frontRef.current;
     const cv = next === 0 ? imgA.current : imgB.current;
     if (!cv) return;
-    const ctx = cv.getContext('2d');
-    ctx?.clearRect(0, 0, cv.width, cv.height);
-    ctx?.drawImage(art, 0, 0, cv.width, cv.height);
+    paintArtTo(cv, FEATURED[active], 78);
     cv.dataset.drawn = '1';
     frontRef.current = next;
     setFront(next);
   }, [assets, active]);
+
+  useEffect(() => {
+    const host = imgA.current?.parentElement;
+    if (!host || !assets) return;
+    const ro = new ResizeObserver(() => {
+      const cv = frontRef.current === 0 ? imgA.current : imgB.current;
+      if (cv) paintArtTo(cv, FEATURED[activeRef.current], 78);
+    });
+    ro.observe(host);
+    return () => ro.disconnect();
+  }, [assets]);
 
   // ---- dial interaction ---------------------------------------------------
   const tune = useCallback((withSound: boolean) => {

@@ -174,3 +174,28 @@ export function makeArtCanvas(item: Item, scale = 1.5): HTMLCanvasElement {
   drawCardArt(ctx, item, scale);
   return cv;
 }
+
+/** Highest pixel density we will draw at (browser zoom raises devicePixelRatio well past 2). */
+export const MAX_DPR = 4;
+
+/**
+ * Draw an item's art into a display canvas at that canvas's true device resolution, so
+ * the type stays sharp at any browser zoom or screen density. Call again on resize.
+ * `reserve` keeps content clear of a title pill overlaid at the bottom.
+ */
+export function paintArtTo(canvas: HTMLCanvasElement, item: Item, reserve = 70) {
+  const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+  const cssW = canvas.clientWidth || CARD_W;
+  const cssH = canvas.clientHeight || CARD_H;
+  const bw = Math.max(2, Math.round(cssW * dpr));
+  const bh = Math.max(2, Math.round(cssH * dpr));
+  if (canvas.width !== bw) canvas.width = bw;
+  if (canvas.height !== bh) canvas.height = bh;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, bw, bh);
+  // design space is 448 wide; scale to the canvas and let the height follow its aspect
+  const scale = bw / CARD_W;
+  drawCardArt(ctx, item, scale, CARD_W, bh / scale, reserve);
+}

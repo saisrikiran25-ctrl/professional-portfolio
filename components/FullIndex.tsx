@@ -5,6 +5,7 @@ import { caseStudies } from '../lib/stories';
 import { sound } from '../lib/audio';
 import { clamp } from '../lib/hooks';
 import { startScroll, stopScroll } from '../lib/scroll';
+import { paintArtTo } from '../lib/cardArt';
 import { useUI } from '../lib/ui';
 
 type Row = { head: string } | { item: Item };
@@ -120,15 +121,13 @@ const FullIndex: React.FC<Props> = ({ open, onClose }) => {
     ctx.fill();
   }, [open, radial, size, hover, R, cx, cy, placedL, placedR]);
 
-  // centre preview
+  // centre preview — drawn at the canvas's true resolution
   useEffect(() => {
     const cv = prevRef.current;
     if (!cv) return;
-    const ctx = cv.getContext('2d');
-    ctx?.clearRect(0, 0, cv.width, cv.height);
-    const art = hover && assets?.arts.get(hover.id);
-    if (art) ctx?.drawImage(art, 0, 0, cv.width, cv.height);
-  }, [hover, assets]);
+    if (hover && assets) paintArtTo(cv, hover, 70);
+    else cv.getContext('2d')?.clearRect(0, 0, cv.width, cv.height);
+  }, [hover, assets, size, R]);
 
   if (!open) return null;
 

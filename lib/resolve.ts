@@ -1,5 +1,5 @@
 import { clamp } from './hooks';
-import { drawCardArt } from './cardArt';
+import { drawCardArt, MAX_DPR } from './cardArt';
 import type { Item } from './items';
 
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -40,7 +40,7 @@ export class ArtStage {
   }
 
   private layout() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     const w = Math.max(1, this.canvas.clientWidth);
     const h = Math.max(1, this.canvas.clientHeight);
     this.w = w;
@@ -75,7 +75,7 @@ export class ArtStage {
     if (this.item && this.item.id === item.id) return;
     const first = !this.item;
     this.item = item;
-    this.render();
+    this.layout(); // re-reads size and pixel density, then renders + draws
     if (this.still) {
       this.t = 1;
       this.draw();

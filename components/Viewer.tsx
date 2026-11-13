@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, X } from 'lucide-react';
 import { ITEMS, ITEM_BY_ID, KIND_LABEL, rgb } from '../lib/items';
 import { sound } from '../lib/audio';
 import { startScroll, stopScroll } from '../lib/scroll';
+import { paintArtTo } from '../lib/cardArt';
 import { useUI } from '../lib/ui';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -71,14 +72,15 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, idx]);
 
-  // art
+  // art — redrawn at the canvas's true resolution (and again on resize / zoom)
   useEffect(() => {
     const cv = canvasRef.current;
-    const art = item && assets?.arts.get(item.id);
-    if (!cv || !art) return;
-    const ctx = cv.getContext('2d');
-    ctx?.clearRect(0, 0, cv.width, cv.height);
-    ctx?.drawImage(art, 0, 0, cv.width, cv.height);
+    if (!cv || !item || !assets) return;
+    const draw = () => paintArtTo(cv, item, 70);
+    draw();
+    const ro = new ResizeObserver(draw);
+    ro.observe(cv);
+    return () => ro.disconnect();
   }, [item, assets]);
 
   if (!item) return null;
