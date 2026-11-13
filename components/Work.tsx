@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Play } from 'lucide-react';
 import { ITEMS, KIND_LABEL, TRACKS } from '../lib/items';
 import { ArtStage } from '../lib/resolve';
 import { sound } from '../lib/audio';
@@ -18,6 +19,9 @@ const VENTURE_TAGLINE = (
 );
 const VENTURE_BLURB =
   'Active ventures currently in incubation and public beta. Hover or tap any card to reveal architectural blueprints, market thesis, and investment opportunities.';
+
+const ACADEMIC_BLURB =
+  'Coursework from the MBA, built as working, deployed prototypes rather than slide decks.';
 
 /**
  * Work — the signature module.
@@ -168,6 +172,12 @@ const Work: React.FC = () => {
                               <p className="list__blurb">{VENTURE_BLURB}</p>
                             </>
                           )}
+                          {t.key === 'ACADEMIC' && (
+                            <>
+                              <p className="list__tag">BUILT TO LEARN. SHIPPED TO LIVE.</p>
+                              <p className="list__blurb">{ACADEMIC_BLURB}</p>
+                            </>
+                          )}
                           <ul className="list__names">
                             {groups[i].map((it, k) => (
                               <li key={it.id}>
@@ -211,9 +221,9 @@ const Work: React.FC = () => {
                       sound.thock(0.7);
                       openViewer(item.id);
                     }}
-                    aria-label={`Open ${item.title} in viewer`}
+                    aria-label={item.video ? `Watch the ${item.title} demo` : `Open ${item.title} in viewer`}
                   >
-                    <Arrow size={18} />
+                    {item.video ? <Play size={18} fill="currentColor" /> : <Arrow size={18} />}
                   </button>
                 </div>
               </div>

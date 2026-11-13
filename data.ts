@@ -191,6 +191,42 @@ export const projects: Project[] = [
   }
 ];
 
+/** Coursework built as part of the MBA — kept apart from the commercial projects. */
+export const academicWork: Project[] = [
+  {
+    id: 'urja-kaushal',
+    title: 'Urja Kaushal',
+    category: 'ACADEMIC',
+    description:
+      'A CSR proposal prototype for a Reliance Foundation-style skilling initiative: solar-technician training, women-led solar enterprise and workplace readiness for village hubs. One platform serves learners, trainers, assessors, employers and funders, each through their own console.',
+    techStack: ['Web app', 'Vercel', 'Role-based consoles', 'Gujarati · Hindi · English'],
+    features: [
+      'Learner journey: courses, the 600-hour solar technician track, tests, certificates, jobs and a profile',
+      'Role consoles for trainer, coordinator, external assessor, employer, project manager and funder',
+      'Available in Gujarati, Hindi and English, with audio support',
+      'One-click demo accounts for every role, plus a guided pitch tour',
+      'Simulated data and sample certificates, not connected to any real NSDC or Reliance system',
+    ],
+    link: 'https://csrproject-one.vercel.app/login',
+    status: 'Live',
+  },
+  {
+    id: 'between-the-tiers',
+    title: 'Between the Tiers',
+    category: 'ACADEMIC',
+    description:
+      'A Database Applications and Data Warehousing group project (IIFT Kakinada) that explains three-tier architecture as a program split into three jobs: show, decide, store. Built as an interactive page rather than a slide deck.',
+    techStack: ['Web app', 'Vercel', 'Interactive explainer', 'Live leaderboard'],
+    features: [
+      'Client, Application and Database tiers explained one at a time, each with its stack',
+      'A "Place Order" request flow: scroll to send one packet through seven steps',
+      'A five-question quiz scored on accuracy and speed, with a live leaderboard',
+    ],
+    link: 'https://3tierarchitecture.vercel.app/',
+    status: 'Live',
+  },
+];
+
 export const education: Education[] = [
   {
     institution: 'Atomic Energy Central School',

@@ -1,11 +1,29 @@
-import { projects, worksInProgress } from '../data';
+import { academicWork, projects, worksInProgress } from '../data';
 import { caseStudies } from './stories';
 
 /** One normalised shape for everything that can appear as a "card" in the
  *  corridor, the full index and the viewer. All text comes straight from
  *  data.ts / stories.ts — nothing is rewritten here. */
 
-export type Kind = 'SAAS' | 'WRAPPER' | 'GPT' | 'AGENT' | 'VENTURE' | 'CASE';
+export type Kind = 'SAAS' | 'WRAPPER' | 'GPT' | 'AGENT' | 'VENTURE' | 'ACADEMIC' | 'CASE';
+
+/** Items that have a recorded product demo: a poster frame and the video itself. */
+const DEMO_IDS = [
+  'synthetix',
+  'prompt-foundry',
+  'aletheia',
+  'contentaccel',
+  'portfolio-forge',
+  'promptboss',
+  'lexis',
+  'build-pilot',
+  'atlas',
+  'urja-kaushal',
+  'between-the-tiers',
+  'venture-0',
+];
+const demoOf = (id: string) =>
+  DEMO_IDS.includes(id) ? { thumb: `media/thumbs/${id}.jpg`, video: `media/demos/${id}.mp4` } : {};
 
 export interface Item {
   id: string;
@@ -23,6 +41,10 @@ export interface Item {
   linkLabel: string;
   github?: string;
   logo?: string;
+  /** poster frame (a real frame from the demo) drawn instead of the generated art */
+  thumb?: string;
+  /** product demo video, played in the viewer */
+  video?: string;
   /** overrides the kind label on generated art */
   kicker?: string;
   color: [number, number, number];
@@ -34,6 +56,7 @@ export const KIND_COLOR: Record<Kind, [number, number, number]> = {
   GPT: [96, 165, 250],
   AGENT: [167, 139, 250],
   VENTURE: [244, 114, 182],
+  ACADEMIC: [250, 204, 21],
   CASE: [251, 146, 60],
 };
 
@@ -43,6 +66,7 @@ export const KIND_LABEL: Record<Kind, string> = {
   GPT: 'GPT',
   AGENT: 'Agent',
   VENTURE: 'Venture',
+  ACADEMIC: 'Academic',
   CASE: 'Case study',
 };
 
@@ -61,6 +85,25 @@ const fromProjects: Item[] = projects.map((p) => ({
   linkLabel: p.category === 'AGENT' ? 'VIEW REPOSITORY' : 'LAUNCH SYSTEM',
   github: p.github,
   color: KIND_COLOR[p.category as Kind] ?? KIND_COLOR.SAAS,
+  ...demoOf(p.id),
+}));
+
+const fromAcademic: Item[] = academicWork.map((p) => ({
+  id: p.id,
+  kind: 'ACADEMIC' as Kind,
+  n: 0,
+  title: p.title,
+  eyebrow: 'ACADEMIC WORK',
+  description: p.description,
+  bullets: p.features ?? [],
+  bulletsLabel: 'WHAT IT DOES',
+  tags: p.techStack,
+  status: p.status,
+  link: p.link,
+  linkLabel: 'LAUNCH PROJECT',
+  github: p.github,
+  color: KIND_COLOR.ACADEMIC,
+  ...demoOf(p.id),
 }));
 
 const fromVentures: Item[] = worksInProgress.map((w, i) => ({
@@ -81,6 +124,7 @@ const fromVentures: Item[] = worksInProgress.map((w, i) => ({
   linkLabel: w.actionText,
   logo: w.logo,
   color: KIND_COLOR.VENTURE,
+  ...demoOf(`venture-${i}`),
 }));
 
 const fromCases: Item[] = caseStudies.map((c) => ({
@@ -99,7 +143,7 @@ const fromCases: Item[] = caseStudies.map((c) => ({
   color: KIND_COLOR.CASE,
 }));
 
-export const ITEMS: Item[] = [...fromProjects, ...fromVentures, ...fromCases].map((it, i) => ({
+export const ITEMS: Item[] = [...fromProjects, ...fromVentures, ...fromAcademic, ...fromCases].map((it, i) => ({
   ...it,
   n: i + 1,
 }));
@@ -152,6 +196,7 @@ export const TRACKS: { key: Kind; label: string; short: string }[] = [
   { key: 'GPT', label: '03 · Custom GPTs', short: 'Custom GPTs' },
   { key: 'AGENT', label: '04 · AI Agents', short: 'AI Agents' },
   { key: 'VENTURE', label: '05 · Startup Ventures', short: 'Startup Ventures' },
+  { key: 'ACADEMIC', label: '06 · Academic Work', short: 'Academic Work' },
 ];
 
 export const rgb = (c: [number, number, number], a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;

@@ -177,6 +177,14 @@ class SoundEngine {
     }, 600);
   }
 
+  /** Pull the whole mix down while a demo video plays its own audio, and restore it after. */
+  duck(on: boolean) {
+    if (!this.ctx || !this._on) return;
+    const t = this.ctx.currentTime;
+    this.master.gain.cancelScheduledValues(t);
+    this.master.gain.setTargetAtTime(on ? 0 : 0.5, t, on ? 0.15 : 0.5);
+  }
+
   toggle() {
     if (this._on) this.disable();
     else this.enable();

@@ -40,6 +40,72 @@ function ellipsize(ctx: Ctx, text: string, maxW: number) {
   return t + '…';
 }
 
+/** Poster frames for items that have a demo video, filled in by loadThumbs(). */
+export const THUMBS = new Map<string, HTMLImageElement>();
+
+export function loadThumbs(items: Item[]): Promise<void> {
+  const jobs = items
+    .filter((i) => i.thumb)
+    .map(
+      (i) =>
+        new Promise<void>((resolve) => {
+          const img = new Image();
+          img.decoding = 'async';
+          img.onload = () => {
+            THUMBS.set(i.id, img);
+            resolve();
+          };
+          img.onerror = () => resolve(); // fall back to the generated art
+          img.src = i.thumb!;
+        })
+    );
+  return Promise.all(jobs).then(() => undefined);
+}
+
+/** A real frame from the demo, cover-fitted, with a soft shade at the foot for the title pill. */
+function drawThumb(ctx: Ctx, img: HTMLImageElement, item: Item, w: number, h: number, text: boolean) {
+  const ir = img.naturalWidth / img.naturalHeight;
+  const br = w / h;
+  let sw = img.naturalWidth;
+  let sh = img.naturalHeight;
+  let sx = 0;
+  let sy = 0;
+  if (ir > br) {
+    sw = sh * br;
+    sx = (img.naturalWidth - sw) / 2;
+  } else {
+    sh = sw / br;
+    sy = (img.naturalHeight - sh) * 0.3; // interfaces keep their header: bias to the top
+  }
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+
+  const shade = ctx.createLinearGradient(0, h * 0.5, 0, h);
+  shade.addColorStop(0, 'rgba(6,8,12,0)');
+  shade.addColorStop(1, 'rgba(6,8,12,0.72)');
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, h * 0.5, w, h * 0.5);
+
+  if (!text) return;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = `600 11px ${FONT_BODY}`;
+  setSpacing(ctx, 2);
+  ctx.fillStyle = rgb(item.color, 1);
+  ctx.shadowColor = 'rgba(0,0,0,0.7)';
+  ctx.shadowBlur = 6;
+  ctx.fillText(`${(item.kicker ?? KIND_LABEL[item.kind]).toUpperCase()}  ·  ${String(item.n).padStart(2, '0')}`, 20, 26);
+  setSpacing(ctx, 0);
+  ctx.font = `600 24px ${FONT_DISPLAY}`;
+  setSpacing(ctx, -0.7);
+  ctx.fillStyle = '#f2f2ef';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(ellipsize(ctx, item.title, w - 40), 20, h - 22);
+  setSpacing(ctx, 0);
+  ctx.shadowBlur = 0;
+}
+
 export function drawCardArt(
   ctx: Ctx,
   item: Item,
@@ -56,6 +122,13 @@ export function drawCardArt(
   const c = item.color;
   ctx.save();
   ctx.scale(scale, scale);
+
+  const poster = item.thumb ? THUMBS.get(item.id) : undefined;
+  if (poster) {
+    drawThumb(ctx, poster, item, w, h, text);
+    ctx.restore();
+    return;
+  }
 
   // base
   const base = ctx.createLinearGradient(0, 0, w, h);

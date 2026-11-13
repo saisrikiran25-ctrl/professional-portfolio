@@ -2,7 +2,7 @@
 export interface Project {
   id: string;
   title: string;
-  category: 'SAAS' | 'WRAPPER' | 'GPT' | 'AGENT' | 'CORE';
+  category: 'SAAS' | 'WRAPPER' | 'GPT' | 'AGENT' | 'CORE' | 'ACADEMIC';
   description: string;
   techStack: string[];
   features?: string[];

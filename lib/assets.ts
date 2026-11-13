@@ -1,5 +1,5 @@
 import { ITEMS, SECTION_ART } from './items';
-import { CARD_H, CARD_W, FONT_BODY, FONT_DISPLAY, makeArtCanvas } from './cardArt';
+import { CARD_H, CARD_W, FONT_BODY, FONT_DISPLAY, loadThumbs, makeArtCanvas } from './cardArt';
 
 export interface Assets {
   arts: Map<string, HTMLCanvasElement>;
@@ -26,6 +26,8 @@ export function loadAssets(): Promise<Assets> {
     } catch {
       /* draw with fallbacks */
     }
+
+    await loadThumbs(ITEMS);
 
     const arts = new Map<string, HTMLCanvasElement>();
     for (const it of ITEMS) arts.set(it.id, makeArtCanvas(it, 2));

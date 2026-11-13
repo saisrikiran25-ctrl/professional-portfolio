@@ -17,6 +17,8 @@ const RIGHT: Row[] = [
   ...by('SAAS', 'WRAPPER').map((item) => ({ item })),
   { head: 'VENTURES' },
   ...by('VENTURE').map((item) => ({ item })),
+  { head: 'ACADEMIC WORK' },
+  ...by('ACADEMIC').map((item) => ({ item })),
 ];
 const LEFT: Row[] = [
   { head: 'CUSTOM GPTS & AGENTS' },

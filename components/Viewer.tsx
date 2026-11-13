@@ -20,6 +20,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
   const item = id ? ITEM_BY_ID.get(id) : null;
   const dialogRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<Element | null>(null);
 
@@ -84,6 +85,14 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
     return () => ro.disconnect();
   }, [item, assets]);
 
+  // demo video: start when it opens (the click that opened it counts as the gesture);
+  // always hand the sound back to the page when it changes or closes
+  useEffect(() => {
+    if (!item?.video) return;
+    videoRef.current?.play().catch(() => {});
+    return () => sound.duck(false);
+  }, [item?.id, item?.video]);
+
   if (!item) return null;
 
   // say the kind once: skip the eyebrow when it only repeats it, but keep a richer one ("VENTURE 01")
@@ -95,16 +104,34 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
 
   return (
     <div className="viewer" role="dialog" aria-modal="true" aria-label={item.title} onClick={() => onChange(null)}>
-      <div className="viewer__panel" ref={dialogRef} onClick={(e) => e.stopPropagation()} style={{ ['--c' as string]: item.color.join(',') }}>
+      <div className={`viewer__panel ${item.video ? 'viewer__panel--video' : ''}`} ref={dialogRef} onClick={(e) => e.stopPropagation()} style={{ ['--c' as string]: item.color.join(',') }}>
         <button ref={closeRef} type="button" className="viewer__close" onClick={() => onChange(null)} aria-label="Close">
           <X size={18} /> <span>Close</span>
         </button>
 
         <div className="viewer__art" key={item.id}>
-          <div className="viewer__card">
-            <canvas ref={canvasRef} width={896} height={560} aria-hidden="true" />
-            <ArtText item={item} pill={false} />
-          </div>
+          {item.video ? (
+            <div className="viewer__card viewer__card--video">
+              <video
+                key={item.id}
+                ref={videoRef}
+                src={item.video}
+                poster={item.thumb}
+                controls
+                playsInline
+                preload="metadata"
+                aria-label={`${item.title} product demo`}
+                onPlay={() => sound.duck(true)}
+                onPause={() => sound.duck(false)}
+                onEnded={() => sound.duck(false)}
+              />
+            </div>
+          ) : (
+            <div className="viewer__card">
+              <canvas ref={canvasRef} width={896} height={560} aria-hidden="true" />
+              <ArtText item={item} pill={false} />
+            </div>
+          )}
         </div>
 
         <div className="viewer__info" key={`i${item.id}`}>

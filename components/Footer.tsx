@@ -95,6 +95,7 @@ const Footer: React.FC = () => {
               <li><a href="#work" data-track="1">AI Wrappers</a></li>
               <li><a href="#work" data-track="2">Custom GPTs</a></li>
               <li><a href="#work" data-track="4">Startup Ventures</a></li>
+              <li><a href="#work" data-track="5">Academic Work</a></li>
             </ul>
           </div>
 

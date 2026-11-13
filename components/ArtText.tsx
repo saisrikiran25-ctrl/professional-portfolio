@@ -6,7 +6,8 @@ import { Item, KIND_LABEL, rgb } from '../lib/items';
  * always a little soft; page text stays razor sharp at any zoom or screen density.
  * The canvas underneath carries only the gradients, dots and outlined number.
  */
-const ArtText: React.FC<{ item: Item; /** leave room for an overlaid title pill */ pill?: boolean }> = ({ item, pill = true }) => (
+const ArtText: React.FC<{ item: Item; /** leave room for an overlaid title pill */ pill?: boolean }> = ({ item, pill = true }) =>
+  item.thumb ? null : (
   <div className={`arttext ${pill ? '' : 'arttext--free'}`} aria-hidden="true">
     <p className="arttext__kicker" style={{ color: rgb(item.color) }}>
       {(item.kicker ?? KIND_LABEL[item.kind]).toUpperCase()}
