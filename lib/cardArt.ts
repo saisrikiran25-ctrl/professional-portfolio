@@ -82,7 +82,7 @@ function drawThumb(ctx: Ctx, img: HTMLImageElement, w: number, h: number) {
     sx = (iw - sw) * 0.15;
   } else if (ir < br) {
     sh = iw / br;
-    sy = (ih - sh) * 0.4;
+    sy = (ih - sh) * 0.5;
   }
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';

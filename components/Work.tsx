@@ -210,15 +210,9 @@ const Work: React.FC = () => {
                 <div className="preview__stage">
                   <canvas ref={canvasRef} className="preview__canvas" aria-hidden="true" />
                   <ArtText item={item} key={item.id} pill={false} />
-                </div>
-                <div className="preview__bar">
-                  <span className="chip">
-                    <b>{item.title}</b>
-                    <i>{KIND_LABEL[item.kind]}</i>
-                  </span>
                   <button
                     type="button"
-                    className="round"
+                    className="round preview__go"
                     onClick={() => {
                       sound.thock(0.7);
                       openViewer(item.id);
@@ -233,7 +227,7 @@ const Work: React.FC = () => {
               <article className="detail" key={item.id}>
                 <h3 className="sr-only">{item.title}</h3>
                 <p className="detail__meta">
-                  <span>{item.kind === 'VENTURE' ? item.eyebrow : `SYS · ${pad(item.n)}`}</span>
+                  <span>{item.kind === 'VENTURE' ? item.eyebrow : `SYS · ${pad(item.n)} · ${KIND_LABEL[item.kind]}`}</span>
                   <span className="status">
                     <i /> {item.status}
                   </span>
