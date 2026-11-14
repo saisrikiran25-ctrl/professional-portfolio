@@ -81,6 +81,21 @@ export const projects: Project[] = [
     status: 'Live'
   },
   {
+    id: 'pyboss',
+    title: 'PyBoss',
+    category: 'SAAS',
+    description: 'AI-powered Python specialist backed by a curated retrieval knowledge base spanning 21 domains, from Python and algorithms to web development, Docker, Git and AI/ML. Ask it anything about Python, frameworks or best practices and it answers with Llama-3.3-70B.',
+    techStack: ['Python', 'Streamlit', 'RAG', 'Llama-3.3-70B'],
+    features: [
+      'RAG Knowledge Base',
+      '21 Knowledge Domains',
+      'Llama-3.3-70B',
+      'Conversational Chat'
+    ],
+    link: 'https://pyboss-8lma3x8popvudbkdcb2d2f.streamlit.app/',
+    status: 'Live'
+  },
+  {
     id: 'promptboss',
     title: 'PromptBoss',
     category: 'WRAPPER',
