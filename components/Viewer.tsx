@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, Pause, Play, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Maximize, Minimize, Pause, Play, Volume2, VolumeX, X } from 'lucide-react';
 import { ITEMS, ITEM_BY_ID, KIND_LABEL, rgb } from '../lib/items';
 import { sound } from '../lib/audio';
 import { startScroll, stopScroll } from '../lib/scroll';
@@ -22,6 +22,32 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const on = () => setFull((document.fullscreenElement ?? (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement) === cardRef.current);
+    document.addEventListener('fullscreenchange', on);
+    document.addEventListener('webkitfullscreenchange', on);
+    return () => {
+      document.removeEventListener('fullscreenchange', on);
+      document.removeEventListener('webkitfullscreenchange', on);
+    };
+  }, []);
+  const toggleFull = () => {
+    const el = cardRef.current as (HTMLDivElement & { webkitRequestFullscreen?: () => void }) | null;
+    const doc = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?: () => void };
+    if (!el) return;
+    if (document.fullscreenElement || doc.webkitFullscreenElement) {
+      (document.exitFullscreen?.() ?? Promise.resolve(doc.webkitExitFullscreen?.())).catch?.(() => {});
+    } else if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    } else {
+      // iPhone Safari can only full-screen the video element itself
+      (videoRef.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null)?.webkitEnterFullscreen?.();
+    }
+  };
   const [vs, setVs] = useState({ playing: false, t: 0, d: 0, muted: false });
   const sync = () => {
     const v = videoRef.current;
@@ -124,7 +150,7 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
 
         <div className="viewer__art" key={item.id}>
           {item.video ? (
-            <div className="viewer__card viewer__card--video">
+            <div className="viewer__card viewer__card--video" ref={cardRef}>
               <video
                 key={item.id}
                 ref={videoRef}
@@ -189,6 +215,9 @@ const Viewer: React.FC<ViewerProps> = ({ id, onChange }) => {
                   aria-label={vs.muted ? 'Unmute' : 'Mute'}
                 >
                   {vs.muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+                </button>
+                <button type="button" className="vbar__btn" onClick={toggleFull} aria-label={full ? 'Exit full screen' : 'Full screen'}>
+                  {full ? <Minimize size={17} /> : <Maximize size={17} />}
                 </button>
               </div>
             </div>

@@ -3190,6 +3190,17 @@ button {
   min-width: min(100%, 320px);
   justify-self: center;
 }
+.viewer__card--video:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  border-radius: 0;
+  display: grid;
+  min-width: 0;
+}
+.viewer__card--video:fullscreen .vbar {
+  padding: 40px clamp(16px, 3vw, 40px) 18px;
+}
 .vbar {
   position: absolute;
   left: 0;
