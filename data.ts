@@ -218,6 +218,36 @@ export const projects: Project[] = [
     ],
     link: 'https://github.com/saisrikiran25-ctrl/invoice-exception-router',
     status: 'Public Repo'
+  },
+  {
+    id: 'client-intelligence',
+    title: 'Client Intelligence Agent',
+    category: 'AGENT',
+    description: 'Multi-step AI agent, built from scratch with a custom orchestrator and no agent framework, that turns a company name into a cited client briefing and a reviewed outreach email. Parallel researchers, a critic loop, code-verified quotes and a human approval gate.',
+    techStack: ['Python', 'Gemini', 'Custom Orchestrator', 'Evals'],
+    features: [
+      'Parallel Researchers',
+      'Quote-Verified Claims',
+      'Critic Loop',
+      'Human Approval'
+    ],
+    link: 'https://github.com/saisrikiran25-ctrl/client-intelligence',
+    status: 'Public Repo'
+  },
+  {
+    id: 'document-to-decision',
+    title: 'Document-to-Decision Agent',
+    category: 'AGENT',
+    description: 'Accounts-payable AI agent that reads invoices and contracts, checks them against the vendor master and purchase orders, and routes every exception to a human with the reasons and a ready-to-send draft.',
+    techStack: ['Python', 'Claude', 'OCR', 'Vendor Master'],
+    features: [
+      'Invoice & Contract Reading',
+      'PO Matching',
+      'Human Approval',
+      'Learned Waivers'
+    ],
+    link: 'https://github.com/saisrikiran25-ctrl/document-to-decision-agent',
+    status: 'Public Repo'
   }
 ];
 
