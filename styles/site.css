@@ -3175,11 +3175,11 @@ button {
   box-shadow: 0 40px 100px -30px rgba(var(--c), 0.55), 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .viewer__panel--video {
-  width: min(1280px, 100%);
+  width: min(1500px, 100%);
 }
 @media (min-width: 861px) {
   .viewer__panel--video {
-    grid-template-columns: 1.55fr 1fr;
+    grid-template-columns: 2.1fr 1fr;
   }
 }
 .viewer__card--video {
