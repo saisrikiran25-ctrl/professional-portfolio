@@ -3185,6 +3185,10 @@ button {
 .viewer__card--video {
   background: #05070a;
   aspect-ratio: 16 / 9;
+  /* never taller than the panel can hold, so the count and arrows below stay clear of it */
+  width: min(100%, calc((100dvh - 2 * var(--m) - 190px) * 16 / 9));
+  min-width: min(100%, 320px);
+  justify-self: center;
 }
 .vbar {
   position: absolute;
