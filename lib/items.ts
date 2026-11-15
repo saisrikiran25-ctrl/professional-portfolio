@@ -20,6 +20,7 @@ const DEMO_IDS = [
   'sop-builder',
   'client-intelligence',
   'document-to-decision',
+  'support-reply-copilot',
   'build-pilot',
   'atlas',
   'urja-kaushal',
@@ -27,7 +28,7 @@ const DEMO_IDS = [
   'venture-0',
 ];
 /** Custom GPTs keep the generated art of the other tracks; their video still plays in the viewer. */
-const ART_ONLY_IDS = ['build-pilot', 'atlas', 'client-intelligence', 'document-to-decision'];
+const ART_ONLY_IDS = ['build-pilot', 'atlas', 'client-intelligence', 'document-to-decision', 'support-reply-copilot'];
 const demoOf = (id: string) =>
   DEMO_IDS.includes(id)
     ? {

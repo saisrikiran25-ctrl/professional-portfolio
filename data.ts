@@ -218,6 +218,21 @@ export const projects: Project[] = [
     ],
     link: 'https://github.com/saisrikiran25-ctrl/document-to-decision-agent',
     status: 'Public Repo'
+  },
+  {
+    id: 'support-reply-copilot',
+    title: 'Support Reply Copilot',
+    category: 'AGENT',
+    description: 'Support co-pilot that turns a pasted customer message into a classified, urgency-flagged, ready-to-review reply in seconds, with an internal summary and a next action step. An n8n workflow with Claude as the brain, and a human who decides before anything is sent.',
+    techStack: ['n8n', 'Claude', 'Human-in-the-Loop'],
+    features: [
+      'Message Classification',
+      'Urgency Flagging',
+      'Draft Reply',
+      'Human Review'
+    ],
+    link: 'https://github.com/saisrikiran25-ctrl/customer-support-automation',
+    status: 'Public Repo'
   }
 ];
 
