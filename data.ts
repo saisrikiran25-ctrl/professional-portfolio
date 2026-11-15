@@ -190,36 +190,6 @@ export const projects: Project[] = [
     status: 'Public Repo'
   },
   {
-    id: 'contract-review-intake',
-    title: 'Contract Review Intake',
-    category: 'AGENT',
-    description: 'n8n automation that ingests legal, financial and operational documents, validates metadata, classifies and extracts structured fields with an LLM, flags risks, and routes each item by priority with human approval tracking.',
-    techStack: ['n8n', 'LLM', 'JSON Schema', 'Slack'],
-    features: [
-      'Doc Classification',
-      'Structured Extraction',
-      'Priority Routing',
-      'Human Approval'
-    ],
-    link: 'https://github.com/saisrikiran25-ctrl/contract-document-review-intake',
-    status: 'Public Repo'
-  },
-  {
-    id: 'invoice-exception-router',
-    title: 'Invoice Exception Router',
-    category: 'AGENT',
-    description: 'AI-assisted accounts-payable automation on n8n. Detects invoice issues before payment, classifies each by exception type, diagnoses the root cause, and routes it to the right owner with the evidence required.',
-    techStack: ['n8n', 'LLM', 'AP Automation'],
-    features: [
-      'Classify',
-      'Diagnose',
-      'Assign Owner',
-      'Evidence Checklist'
-    ],
-    link: 'https://github.com/saisrikiran25-ctrl/invoice-exception-router',
-    status: 'Public Repo'
-  },
-  {
     id: 'client-intelligence',
     title: 'Client Intelligence Agent',
     category: 'AGENT',
