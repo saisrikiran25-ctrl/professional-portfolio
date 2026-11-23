@@ -107,7 +107,7 @@ const Experience: React.FC = () => {
         const cy = e.clientY || window.innerHeight / 2;
         warpTo({
           label: LABELS[href] ?? a.textContent?.trim() ?? 'Section',
-          color: [0, 255, 102],
+          color: [251, 94, 40],
           x: cx,
           y: cy,
           go: jump,

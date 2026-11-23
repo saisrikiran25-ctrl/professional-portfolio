@@ -22,7 +22,7 @@ const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
  * Falling glyph columns drawn in one fragment shader. The glyphs are generated on the fly from
  * random strokes on a 3x3 lattice (no font or image). u_prog fills the screen with rain and
  * speeds it up, u_lock turns the middle into the name, written in tiny glyphs, while the rain
- * brightens to a green-white, and u_fall dives the camera into the glyphs.
+ * shifts from green to the site's orange, and u_fall dives the camera into the glyphs.
  */
 const FS = `
 precision highp float;
@@ -82,8 +82,8 @@ vec2 rain(vec2 p){
 vec3 palette(float br, float head){
   vec3 g = mix(vec3(0.02, 0.5, 0.14), vec3(0.22, 1.0, 0.5), br);
   g = mix(g, vec3(0.85, 1.0, 0.9), head);
-  vec3 o = mix(vec3(0.05, 0.42, 0.2), vec3(0.62, 1.0, 0.8), br);
-  o = mix(o, vec3(1.0, 1.0, 1.0), head);
+  vec3 o = mix(vec3(0.5, 0.16, 0.04), vec3(1.0, 0.52, 0.18), br);
+  o = mix(o, vec3(1.0, 0.92, 0.82), head);
   return mix(g, o, u_lock);
 }
 
@@ -138,12 +138,12 @@ void main(){
   float reveal = smoothstep(0.85, 1.0, prog) * 0.3 + u_lock * 0.8;
   float on = step(0.5, m) * step(h2, reveal);
   float gl2 = glyph(fract(p / sn), floor(u_t * 8.0 * (0.5 + h2) + h2 * 40.0));
-  vec3 nameCol = mix(vec3(0.25, 1.0, 0.55), vec3(0.88, 1.0, 0.94), gl2) * (0.55 + 0.8 * gl2) * (0.85 + 0.15 * sin(u_t * 30.0 + h2 * 40.0));
+  vec3 nameCol = mix(vec3(1.0, 0.5, 0.16), vec3(1.0, 0.93, 0.82), gl2) * (0.55 + 0.8 * gl2) * (0.85 + 0.15 * sin(u_t * 30.0 + h2 * 40.0));
   col += nameCol * on;
-  col += vec3(0.15, 1.0, 0.45) * soft * u_lock * 0.16;
+  col += vec3(1.0, 0.4, 0.1) * soft * u_lock * 0.16;
 
-  // the dive ends in a flash of green-white, then black
-  col += vec3(0.55, 1.0, 0.75) * smoothstep(0.55, 0.88, fall) * (1.0 - smoothstep(0.88, 1.0, fall)) * 0.9 * exp(-length(uv) * 2.6);
+  // the dive ends in a flash of orange, then black
+  col += vec3(1.0, 0.55, 0.2) * smoothstep(0.55, 0.88, fall) * (1.0 - smoothstep(0.88, 1.0, fall)) * 0.9 * exp(-length(uv) * 2.6);
   col *= 1.0 - smoothstep(0.9, 1.0, fall);
   col = 1.0 - exp(-col * 1.5);
   col *= 1.0 - 0.45 * smoothstep(0.35, 1.1, length(uv));

@@ -39,7 +39,7 @@ const DIAL: DialSector[] = [
 ];
 
 const colorOf = (id: string): [number, number, number] =>
-  (ITEM_BY_ID.get(id)?.color ?? SECTION_ART.find((s) => s.id === id)?.color ?? [0, 255, 102]) as [number, number, number];
+  (ITEM_BY_ID.get(id)?.color ?? SECTION_ART.find((s) => s.id === id)?.color ?? [251, 94, 40]) as [number, number, number];
 
 const N = FEATURED.length;
 const TICKS = 160;
@@ -96,7 +96,7 @@ function paintBackdrop(
   for (let i = 0; i < DIAL.length; i++) {
     const a0 = i * wedge - Math.PI / 2 - wedge / 2;
     const hot = hovered === i || hovered === (i + 1) % DIAL.length;
-    ctx.strokeStyle = hot ? 'rgba(0, 255, 102,0.55)' : 'rgba(150, 255, 185,0.09)';
+    ctx.strokeStyle = hot ? 'rgba(251, 94, 40,0.55)' : 'rgba(255, 255, 255,0.09)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     const [sx, sy] = P(a0, R * 1.04);
@@ -140,14 +140,14 @@ function paintRing(
   // breathing halo around the ring
   const pulse = 0.5 + 0.5 * Math.sin(t * 1.4);
   const halo = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.22);
-  halo.addColorStop(0, 'rgba(0, 255, 102,0)');
-  halo.addColorStop(0.55, `rgba(0, 255, 102,${(0.05 + 0.05 * pulse + 0.09 * tuneK) * ie})`);
-  halo.addColorStop(1, 'rgba(0, 255, 102,0)');
+  halo.addColorStop(0, 'rgba(251, 94, 40,0)');
+  halo.addColorStop(0.55, `rgba(251, 94, 40,${(0.05 + 0.05 * pulse + 0.09 * tuneK) * ie})`);
+  halo.addColorStop(1, 'rgba(251, 94, 40,0)');
   ctx.fillStyle = halo;
   ctx.fillRect(0, 0, w, h);
 
   // inner hairline ring and degree marks
-  ctx.strokeStyle = `rgba(150, 255, 185,${0.1 * ie})`;
+  ctx.strokeStyle = `rgba(255, 255, 255,${0.1 * ie})`;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.arc(cx, cy, R * 0.9, 0, TAU);
@@ -159,7 +159,7 @@ function paintRing(
     for (let i = 0; i < DIAL.length; i++) {
       const a = (i / DIAL.length) * TAU - Math.PI / 2;
       const on = hovered === i;
-      ctx.fillStyle = on ? `rgba(0, 255, 102,${ie})` : `rgba(150, 255, 185,${0.3 * ie})`;
+      ctx.fillStyle = on ? `rgba(251, 94, 40,${ie})` : `rgba(255, 255, 255,${0.3 * ie})`;
       ctx.fillText(String(Math.round((i * 360) / DIAL.length)).padStart(3, '0'), cx + Math.cos(a) * (R * 0.9 - 14), cy + Math.sin(a) * (R * 0.9 - 14));
     }
   }
@@ -173,7 +173,7 @@ function paintRing(
       const p = (t * speed + seed * 7) % 1;
       const rr = R * (1.07 + p * 0.95);
       const alpha = Math.sin(p * Math.PI) * 0.55 * ie;
-      ctx.fillStyle = `rgba(${30 + (m % 5) * 18},255,${110 + (m % 4) * 20},${alpha})`;
+      ctx.fillStyle = `rgba(255,${150 + (m % 5) * 18},${90 + (m % 4) * 20},${alpha})`;
       ctx.beginPath();
       ctx.arc(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr, 0.9 + (m % 3) * 0.45, 0, TAU);
       ctx.fill();
@@ -218,8 +218,8 @@ function paintRing(
   const ia = (hovered >= 0 ? hovered * wedge : tuneK > 0.5 ? 0 : sweep) - Math.PI / 2;
   const dx = cx + Math.cos(ia) * (R - 10);
   const dy = cy + Math.sin(ia) * (R - 10);
-  ctx.fillStyle = '#00ff66';
-  ctx.shadowColor = 'rgba(0, 255, 102,0.95)';
+  ctx.fillStyle = '#fb5e28';
+  ctx.shadowColor = 'rgba(251, 94, 40,0.95)';
   ctx.shadowBlur = 16;
   ctx.beginPath();
   ctx.arc(dx, dy, 5 * (1 + 0.22 * Math.sin(t * 4)) * ie, 0, TAU);
@@ -638,7 +638,7 @@ const Hero: React.FC = () => {
             <button
               type="button"
               className="reel__card"
-              style={{ boxShadow: `0 0 0 1px rgba(150, 255, 185,.07), 0 40px 110px -30px rgba(${glow},.55), 0 0 160px -40px rgba(${glow},.65)` }}
+              style={{ boxShadow: `0 0 0 1px rgba(255, 255, 255,.07), 0 40px 110px -30px rgba(${glow},.55), 0 0 160px -40px rgba(${glow},.65)` }}
               onClick={() => {
                 sound.thock(0.7);
                 openViewer(item.id);

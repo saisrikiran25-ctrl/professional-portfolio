@@ -66,13 +66,13 @@ export interface Item {
 }
 
 export const KIND_COLOR: Record<Kind, [number, number, number]> = {
-  SAAS: [0, 255, 102],
-  WRAPPER: [0, 230, 170],
-  GPT: [120, 255, 150],
-  AGENT: [170, 255, 90],
-  VENTURE: [0, 255, 210],
-  ACADEMIC: [210, 255, 110],
-  CASE: [60, 220, 120],
+  SAAS: [251, 94, 40],
+  WRAPPER: [45, 212, 191],
+  GPT: [96, 165, 250],
+  AGENT: [167, 139, 250],
+  VENTURE: [244, 114, 182],
+  ACADEMIC: [250, 204, 21],
+  CASE: [251, 146, 60],
 };
 
 export const KIND_LABEL: Record<Kind, string> = {
@@ -181,7 +181,7 @@ export const SECTION_ART: Item[] = [
     status: 'Verified academic record',
     link: '',
     linkLabel: '',
-    color: [90, 255, 160],
+    color: [96, 165, 250],
   },
   {
     id: 'sec-creds',
@@ -197,7 +197,7 @@ export const SECTION_ART: Item[] = [
     status: 'Verified',
     link: '',
     linkLabel: '',
-    color: [0, 230, 170],
+    color: [45, 212, 191],
   },
 ];
 

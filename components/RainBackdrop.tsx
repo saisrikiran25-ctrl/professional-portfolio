@@ -46,7 +46,7 @@ const RainBackdrop: React.FC = () => {
         const y = drops[i] * size;
         if (y > -size) {
           const ch = GLYPHS[(Math.random() * GLYPHS.length) | 0];
-          ctx.fillStyle = Math.random() < 0.04 ? 'rgba(200,255,220,0.95)' : 'rgba(0,255,102,0.85)';
+          ctx.fillStyle = Math.random() < 0.04 ? 'rgba(255,226,206,0.95)' : 'rgba(251, 94, 40,0.85)';
           ctx.fillText(ch, i * size, y);
         }
         drops[i] += speeds[i];

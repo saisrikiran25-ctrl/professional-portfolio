@@ -6,24 +6,24 @@
    Tokens
    ===================================================================== */
 :root {
-  --bg: #000802;
-  --bg-darker: #000501;
-  --bg-card: #03110a;
-  --bg-card-hover: #061a0f;
-  --fg: #d4ffe0;
-  --fg-dim: #8fcfa2;
-  --muted: #5a9a70;
-  --accent: #00ff66;
-  --accent-bright: #5dff9a;
-  --accent-dim: #00a843;
-  --accent-glow: rgba(0, 255, 102, 0.45);
-  --silver: #a8e6bc;
-  --silver-dim: #3d6e50;
-  --line: rgba(0, 255, 102, 0.14);
-  --border: rgba(0, 255, 102, 0.14);
-  --border-light: rgba(0, 255, 102, 0.28);
-  --surface: rgba(0, 255, 102, 0.04);
-  --ok: #7dffb0;
+  --bg: #090c12;
+  --bg-darker: #06080c;
+  --bg-card: #11151c;
+  --bg-card-hover: #171c25;
+  --fg: #f2f2ef;
+  --fg-dim: #b7bcc6;
+  --muted: #8a909b;
+  --accent: #fb5e28;
+  --accent-bright: #ff7a4d;
+  --accent-dim: #b33a00;
+  --accent-glow: rgba(251, 94, 40, 0.45);
+  --silver: #c8c8c8;
+  --silver-dim: #5f6775;
+  --line: rgba(251, 94, 40, 0.16);
+  --border: rgba(251, 94, 40, 0.16);
+  --border-light: rgba(251, 94, 40, 0.3);
+  --surface: rgba(251, 94, 40, 0.04);
+  --ok: #34d399;
 
   --m: clamp(18px, 3vw, 48px);
   --r: 3px;
@@ -99,7 +99,7 @@ button {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #0c2b19;
+  background: #232a35;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -121,7 +121,7 @@ button {
   padding: 10px 18px;
   border-radius: 999px;
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   font-weight: 600;
   font-size: 14px;
   transition: top 0.2s;
@@ -151,7 +151,7 @@ button {
   width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #0f3320;
+  background: #262d38;
   border-radius: 3px;
 }
 
@@ -192,7 +192,7 @@ button {
 }
 .display .thin {
   font-weight: 200;
-  color: rgba(212, 255, 224, 0.86);
+  color: rgba(242, 242, 239, 0.86);
 }
 .acc {
   color: var(--accent);
@@ -252,7 +252,7 @@ button {
 }
 .pill--solid {
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
 }
 .pill--solid:hover {
   background: var(--accent-bright);
@@ -307,8 +307,8 @@ button {
   max-width: calc(100% - 66px);
   padding: 11px 20px;
   border-radius: 999px;
-  background: #d4ffe0;
-  color: #000a04;
+  background: #f2f2ef;
+  color: #090c12;
   font-size: clamp(13px, 1.1vw, 15.5px);
   white-space: nowrap;
   overflow: hidden;
@@ -319,7 +319,7 @@ button {
 }
 .chip i {
   font-style: normal;
-  color: #3f7a55;
+  color: #5b616c;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -330,8 +330,8 @@ button {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #d4ffe0;
-  color: #000a04;
+  background: #f2f2ef;
+  color: #090c12;
   transition: transform 0.35s var(--ease-out), background 0.25s;
 }
 .round:hover {
@@ -357,12 +357,12 @@ button {
   height: 10px;
   border-radius: 50%;
   background: var(--ok);
-  box-shadow: 0 0 0 0 rgba(125, 255, 176, 0.7);
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
   animation: ping 1.9s ease-out infinite;
 }
 @keyframes ping {
   to {
-    box-shadow: 0 0 0 12px rgba(125, 255, 176, 0);
+    box-shadow: 0 0 0 12px rgba(52, 211, 153, 0);
   }
 }
 @keyframes rise {
@@ -420,7 +420,7 @@ button {
 .pre__veil {
   position: absolute;
   inset: 0;
-  background: #000401;
+  background: #05070a;
   clip-path: circle(160vmax at 50% 50%);
   transition: clip-path 1s cubic-bezier(0.65, 0, 0.2, 1) 0.1s;
   overflow: hidden;
@@ -451,8 +451,8 @@ button {
   margin: calc(min(34vmin, 260px) / -2) 0 0 calc(min(34vmin, 260px) / -2);
   border-radius: 50%;
   background: radial-gradient(circle, #000 52%, transparent 53%),
-    conic-gradient(from 0deg, #00ff66, #d8ffe6, #02501f, #00ff66);
-  box-shadow: 0 0 80px 10px rgba(0, 255, 102, 0.35);
+    conic-gradient(from 0deg, #fb5e28, #ffe3d2, #5a1d0c, #fb5e28);
+  box-shadow: 0 0 80px 10px rgba(251, 94, 40, 0.35);
   animation: pre-spin 6s linear infinite;
   transform: scale(calc(1 + var(--f) * var(--f) * 40));
 }
@@ -505,7 +505,7 @@ button {
   font: 600 clamp(15px, 2.4vw, 26px) var(--f-display);
   letter-spacing: 0.34em;
   text-indent: 0.34em;
-  color: rgba(212, 255, 224, 0.9);
+  color: rgba(242, 242, 239, 0.9);
   pointer-events: none;
 }
 .pre__name span {
@@ -592,13 +592,13 @@ button {
   right: 0;
   bottom: 0;
   height: 2px;
-  background: rgba(150, 255, 185, 0.06);
+  background: rgba(255, 255, 255, 0.06);
 }
 .pre__bar i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-dim), var(--accent), #b9ffd2);
-  box-shadow: 0 0 18px rgba(0, 255, 102, 0.9);
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent), #ffd2c0);
+  box-shadow: 0 0 18px rgba(251, 94, 40, 0.9);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -615,7 +615,7 @@ button {
   width: 36px;
   height: 36px;
   margin: -18px 0 0 -18px;
-  border: 1.5px solid rgba(212, 255, 224, 0.5);
+  border: 1.5px solid rgba(242, 242, 239, 0.5);
   border-radius: 50%;
   opacity: 0;
   transition: transform 0.35s var(--ease-out), opacity 0.3s, background 0.3s, border-color 0.3s;
@@ -626,7 +626,7 @@ button {
 .cursor.is-link span {
   transform: scale(1.55);
   border-color: var(--accent);
-  background: rgba(0, 255, 102, 0.12);
+  background: rgba(251, 94, 40, 0.12);
 }
 @media (hover: none), (pointer: coarse) {
   .cursor {
@@ -655,7 +655,7 @@ button {
   position: absolute;
   inset: 0 0 -26px;
   z-index: -1;
-  background: linear-gradient(to bottom, rgba(0, 10, 4, 0.86), rgba(0, 10, 4, 0));
+  background: linear-gradient(to bottom, rgba(9, 12, 18, 0.86), rgba(9, 12, 18, 0));
   backdrop-filter: blur(10px);
   -webkit-mask-image: linear-gradient(#000 45%, transparent);
   mask-image: linear-gradient(#000 45%, transparent);
@@ -766,7 +766,7 @@ button {
   position: fixed;
   inset: 0;
   z-index: 85;
-  background: rgba(0, 10, 4, 0.97);
+  background: rgba(9, 12, 18, 0.97);
   backdrop-filter: blur(16px);
   display: grid;
   align-items: center;
@@ -832,7 +832,7 @@ button {
   height: 46px;
   padding: 0 20px;
   border-radius: 999px;
-  background: rgba(4, 20, 11, 0.7);
+  background: rgba(17, 21, 28, 0.7);
   box-shadow: inset 0 0 0 1px var(--line);
   backdrop-filter: blur(14px);
   font: 600 13px var(--f-body);
@@ -906,7 +906,7 @@ button {
   padding: 0 24px 0 22px;
   border-radius: 999px;
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   font: 700 12px var(--f-body);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -928,7 +928,7 @@ button {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #000a04;
+  background: #090c12;
   animation: pulse 1.6s ease-in-out infinite;
 }
 .float-cta__k {
@@ -938,7 +938,7 @@ button {
   height: 46px;
   padding: 0 16px;
   border-radius: 999px;
-  background: rgba(4, 20, 11, 0.7);
+  background: rgba(17, 21, 28, 0.7);
   box-shadow: inset 0 0 0 1px var(--line);
   backdrop-filter: blur(14px);
   color: var(--fg-dim);
@@ -977,7 +977,7 @@ button {
   height: 100dvh;
   overflow: hidden;
   background: var(--bg);
-  --tint: 0, 255, 102;
+  --tint: 251, 94, 40;
 }
 .hero__gl,
 .hero__dial,
@@ -999,8 +999,8 @@ button {
 .hero__vignette {
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 52%, transparent 38%, rgba(0, 10, 4, 0.8) 100%),
-    linear-gradient(to bottom, rgba(0, 10, 4, 0.55), transparent 20%, transparent 78%, rgba(0, 10, 4, 0.6));
+  background: radial-gradient(ellipse at 50% 52%, transparent 38%, rgba(9, 12, 18, 0.8) 100%),
+    linear-gradient(to bottom, rgba(9, 12, 18, 0.55), transparent 20%, transparent 78%, rgba(9, 12, 18, 0.6));
 }
 .hero__dial {
   z-index: 2;
@@ -1045,12 +1045,12 @@ button {
   margin-bottom: calc(var(--R) * 0.08);
   padding: calc(var(--R) * 0.034) calc(var(--R) * 0.07);
   border-radius: 999px;
-  border: 1px solid rgba(0, 255, 102, 0.5);
-  background: rgba(0, 255, 102, 0.1);
+  border: 1px solid rgba(251, 94, 40, 0.5);
+  background: rgba(251, 94, 40, 0.1);
   font: 700 clamp(8px, calc(var(--R) * 0.042), 11px) var(--f-body);
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #b9ffd2;
+  color: #ffd2c0;
   transition: background 0.3s, border-color 0.3s, transform 0.4s var(--ease-out);
 }
 .dial__tune i {
@@ -1060,16 +1060,16 @@ button {
   min-height: 5px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7);
+  box-shadow: 0 0 0 0 rgba(251, 94, 40, 0.7);
   animation: ping-o 1.8s ease-out infinite;
 }
 @keyframes ping-o {
   to {
-    box-shadow: 0 0 0 10px rgba(0, 255, 102, 0);
+    box-shadow: 0 0 0 10px rgba(251, 94, 40, 0);
   }
 }
 .dial__tune:not(:disabled):hover {
-  background: rgba(0, 255, 102, 0.22);
+  background: rgba(251, 94, 40, 0.22);
   border-color: var(--accent);
   transform: translateY(-1px);
 }
@@ -1101,7 +1101,7 @@ button {
 }
 .dial__name strong {
   font-weight: 700;
-  background: linear-gradient(105deg, #d4ffe0 42%, #8dffb8 50%, #d4ffe0 58%) 0 0 / 260% 100%;
+  background: linear-gradient(105deg, #f2f2ef 42%, #ffb596 50%, #f2f2ef 58%) 0 0 / 260% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1152,7 +1152,7 @@ button {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: rgba(212, 255, 224, 0.84);
+  color: rgba(242, 242, 239, 0.84);
   transition: color 0.25s, letter-spacing 0.5s var(--ease-out);
 }
 .dial__label.is-hot,
@@ -1183,7 +1183,7 @@ button {
   container-type: size;
   border-radius: var(--r);
   overflow: hidden;
-  background: #010d07;
+  background: #0b0e14;
   pointer-events: none;
   transition: box-shadow 1s var(--ease-out);
 }
@@ -1214,8 +1214,8 @@ button {
   max-width: calc(100% - clamp(58px, 6vw, 84px));
   padding: clamp(7px, 0.9vw, 11px) clamp(12px, 1.5vw, 20px);
   border-radius: 999px;
-  background: #d4ffe0;
-  color: #000a04;
+  background: #f2f2ef;
+  color: #090c12;
   font-size: clamp(11px, 1.1vw, 15.5px);
   white-space: nowrap;
   overflow: hidden;
@@ -1227,7 +1227,7 @@ button {
 }
 .reel__chip i {
   font-style: normal;
-  color: #3f7a55;
+  color: #5b616c;
 }
 .reel__play {
   position: absolute;
@@ -1238,8 +1238,8 @@ button {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #d4ffe0;
-  color: #000a04;
+  background: #f2f2ef;
+  color: #090c12;
   transition: transform 0.4s var(--ease-out), background 0.25s;
 }
 .reel__card:hover .reel__play {
@@ -1265,7 +1265,7 @@ button {
   width: 26px;
   height: 3px;
   border-radius: 2px;
-  background: rgba(150, 255, 185, 0.22);
+  background: rgba(255, 255, 255, 0.22);
   transition: width 0.5s var(--ease-out), background 0.3s;
 }
 .reel__dot::before {
@@ -1355,7 +1355,7 @@ button {
   width: 100%;
   padding: clamp(10px, 1.35vw, 18px) 0;
   text-align: left;
-  color: rgba(212, 255, 224, 0.36);
+  color: rgba(242, 242, 239, 0.36);
   transition: color 0.5s var(--ease-out);
 }
 .list__head:hover,
@@ -1438,7 +1438,7 @@ button {
   flex: none;
   font: 600 10.5px var(--f-body);
   letter-spacing: 0.12em;
-  color: rgba(150, 255, 185, 0.28);
+  color: rgba(255, 255, 255, 0.28);
   transition: color 0.3s;
 }
 .name__t {
@@ -1468,13 +1468,13 @@ button {
   min-width: 0;
 }
 .preview {
-  --c: 0, 255, 102;
+  --c: 251, 94, 40;
   position: relative;
   width: 100%;
   height: clamp(230px, 38vh, 430px);
   border-radius: var(--r);
   overflow: hidden;
-  background: #010d07;
+  background: #0b0e14;
   box-shadow: 0 50px 130px -60px rgba(var(--c), 0.65);
   transition: box-shadow 1s var(--ease-out);
 }
@@ -1712,7 +1712,7 @@ button {
   padding: 5px 12px;
   border-radius: 999px;
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   font: 700 10px var(--f-body);
   letter-spacing: 0.14em;
 }
@@ -1771,7 +1771,7 @@ button {
   color: var(--muted);
 }
 .case__stats dt span {
-  color: #4a8a60;
+  color: #69707b;
 }
 .tele__controls {
   display: flex;
@@ -1798,7 +1798,7 @@ button {
   height: 3px;
   width: 14px;
   border-radius: 2px;
-  background: rgba(150, 255, 185, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   transition: width 0.5s var(--ease-out), background 0.3s;
 }
 .tele__dots button::before {
@@ -1826,7 +1826,7 @@ button {
 }
 .tele__arrows button:hover:not(:disabled) {
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   box-shadow: none;
 }
 .tele__arrows button:disabled {
@@ -1900,7 +1900,7 @@ button {
   height: 3px;
   width: 14px;
   border-radius: 2px;
-  background: rgba(150, 255, 185, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   transition: width 0.5s var(--ease-out), background 0.3s;
 }
 .focus__dots button::before {
@@ -1924,7 +1924,7 @@ button {
   overflow: hidden;
   border-radius: calc(var(--r) * 1.15);
   background: #000;
-  box-shadow: 0 60px 140px -70px rgba(0, 255, 102, 0.55);
+  box-shadow: 0 60px 140px -70px rgba(251, 94, 40, 0.55);
 }
 .portrait__frame img {
   width: 100%;
@@ -1943,7 +1943,7 @@ button {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(0, 10, 4, 0.7), transparent 45%);
+  background: linear-gradient(to top, rgba(9, 12, 18, 0.7), transparent 45%);
 }
 .portrait__tag {
   position: absolute;
@@ -1958,7 +1958,7 @@ button {
 }
 .portrait__tag--r {
   right: 20px;
-  color: rgba(150, 255, 185, 0.75);
+  color: rgba(255, 255, 255, 0.75);
 }
 .portrait__bar {
   position: absolute;
@@ -2068,7 +2068,7 @@ button {
   font: 200 clamp(26px, 3.4vw, 54px) var(--f-display);
   letter-spacing: -0.02em;
   white-space: nowrap;
-  color: rgba(212, 255, 224, 0.22);
+  color: rgba(242, 242, 239, 0.22);
 }
 .marquee__row li b {
   padding: 0 clamp(22px, 3vw, 48px);
@@ -2111,7 +2111,7 @@ button {
   font: 700 clamp(48px, 8.5vw, 140px) var(--f-display);
   line-height: 1;
   letter-spacing: -0.02em;
-  color: rgba(212, 255, 224, 0.07);
+  color: rgba(242, 242, 239, 0.07);
   will-change: transform, opacity;
 }
 /* scroll-linked: --e (0 to 1) is set from the scroll position, so the year moves with the page */
@@ -2151,7 +2151,7 @@ button {
 .tl__list::after {
   height: calc(var(--p) * 100%);
   background: linear-gradient(var(--accent-dim), var(--accent));
-  box-shadow: 0 0 18px rgba(0, 255, 102, 0.7);
+  box-shadow: 0 0 18px rgba(251, 94, 40, 0.7);
 }
 .tl__item {
   position: relative;
@@ -2169,7 +2169,7 @@ button {
   height: 14px;
   border-radius: 50%;
   background: var(--bg);
-  box-shadow: inset 0 0 0 2px rgba(150, 255, 185, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
   z-index: 2;
   transition: all 0.7s var(--ease-out);
 }
@@ -2181,7 +2181,7 @@ button {
 }
 .tl__item.is-past .tl__node {
   background: var(--accent);
-  box-shadow: 0 0 0 6px rgba(0, 255, 102, 0.18), 0 0 24px rgba(0, 255, 102, 0.95);
+  box-shadow: 0 0 0 6px rgba(251, 94, 40, 0.18), 0 0 24px rgba(251, 94, 40, 0.95);
 }
 .tl__card {
   position: relative;
@@ -2197,7 +2197,7 @@ button {
 .tl__item.is-past .tl__card {
   opacity: 1;
   transform: none;
-  box-shadow: inset 0 0 0 1px rgba(0, 255, 102, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(251, 94, 40, 0.25);
 }
 .tl__row {
   display: flex;
@@ -2256,7 +2256,7 @@ button {
   display: block;
 }
 .gauge line {
-  stroke: rgba(150, 255, 185, 0.16);
+  stroke: rgba(255, 255, 255, 0.16);
   stroke-width: 1.5;
   stroke-linecap: round;
   transition: stroke 0.5s;
@@ -2297,7 +2297,7 @@ button {
   letter-spacing: -0.02em;
   line-height: 1;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(212, 255, 224, 0.42);
+  -webkit-text-stroke: 1px rgba(242, 242, 239, 0.42);
   transition: color 0.9s var(--ease-out), -webkit-text-stroke-color 0.9s;
 }
 .is-past .years span {
@@ -2400,7 +2400,7 @@ button {
   width: 100%;
   padding: 14px 0;
   border: 0;
-  border-bottom: 1px solid rgba(150, 255, 185, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
   background: transparent;
   color: var(--fg);
@@ -2408,7 +2408,7 @@ button {
   transition: border-color 0.35s;
 }
 .input::placeholder {
-  color: rgba(212, 255, 224, 0.28);
+  color: rgba(242, 242, 239, 0.28);
   font-size: 12px;
   letter-spacing: 0.16em;
 }
@@ -2448,11 +2448,11 @@ button {
 }
 .chipbtn:hover {
   color: var(--fg);
-  box-shadow: inset 0 0 0 1px rgba(150, 255, 185, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 .chipbtn.is-on {
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   box-shadow: none;
 }
 .form__submit {
@@ -2576,7 +2576,7 @@ button {
   place-items: center;
   border-radius: 50%;
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   font: 700 15px var(--f-display);
   letter-spacing: -0.02em;
 }
@@ -2614,7 +2614,7 @@ button {
 }
 .footer__social a:hover {
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   box-shadow: none;
 }
 .footer h5 {
@@ -2682,12 +2682,12 @@ button {
   display: grid;
   place-items: center;
   padding: var(--m);
-  background: rgba(0, 4, 1, 0.84);
+  background: rgba(5, 7, 10, 0.84);
   backdrop-filter: blur(16px);
   animation: fade 0.35s;
 }
 .viewer__panel {
-  --c: 0, 255, 102;
+  --c: 251, 94, 40;
   position: relative;
   display: grid;
   grid-template-columns: 1.05fr 1fr;
@@ -2695,7 +2695,7 @@ button {
   max-height: calc(100dvh - var(--m) * 2);
   overflow: auto;
   border-radius: calc(var(--r) * 1.3);
-  background: #020f08;
+  background: #0c1017;
   box-shadow: inset 0 0 0 1px var(--line), 0 70px 180px -50px rgba(var(--c), 0.4);
   animation: pop 0.7s var(--ease-out);
 }
@@ -2717,7 +2717,7 @@ button {
   width: 100%;
   height: auto;
   border-radius: var(--r);
-  box-shadow: 0 40px 100px -30px rgba(var(--c), 0.55), 0 0 0 1px rgba(150, 255, 185, 0.07);
+  box-shadow: 0 40px 100px -30px rgba(var(--c), 0.55), 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .viewer__info {
   padding: clamp(30px, 3.6vw, 56px);
@@ -2745,8 +2745,8 @@ button {
   height: 42px;
   padding: 0 18px;
   border-radius: 999px;
-  background: #d4ffe0;
-  color: #000a04;
+  background: #f2f2ef;
+  color: #090c12;
   font: 700 13px var(--f-body);
   transition: background 0.25s;
 }
@@ -2772,7 +2772,7 @@ button {
 }
 .viewer__nav button:hover {
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   box-shadow: none;
 }
 .viewer__count {
@@ -2832,7 +2832,7 @@ button {
   height: 100%;
   display: block;
   border-radius: var(--r);
-  box-shadow: 0 40px 100px -30px rgba(0, 255, 102, 0.5);
+  box-shadow: 0 40px 100px -30px rgba(251, 94, 40, 0.5);
 }
 .fi__item {
   position: absolute;
@@ -2950,7 +2950,7 @@ button {
   justify-content: center;
   align-items: flex-start;
   padding: 12vh var(--m) 0;
-  background: rgba(0, 4, 1, 0.78);
+  background: rgba(5, 7, 10, 0.78);
   backdrop-filter: blur(16px);
   animation: fade 0.3s;
 }
@@ -2961,8 +2961,8 @@ button {
   max-height: 74vh;
   overflow: hidden;
   border-radius: var(--r);
-  background: #020f08;
-  box-shadow: inset 0 0 0 1px var(--line), 0 60px 160px -40px rgba(0, 255, 102, 0.3);
+  background: #0c1017;
+  box-shadow: inset 0 0 0 1px var(--line), 0 60px 160px -40px rgba(251, 94, 40, 0.3);
   animation: pop 0.6s var(--ease-out);
 }
 .cmdk__top,
@@ -3013,7 +3013,7 @@ button {
   outline: none;
 }
 .cmdk__input input::placeholder {
-  color: rgba(212, 255, 224, 0.3);
+  color: rgba(242, 242, 239, 0.3);
 }
 .cmdk__input button {
   font: 700 10px var(--f-body);
@@ -3038,7 +3038,7 @@ button {
 }
 .cmdk__filters button.is-on {
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
   box-shadow: none;
 }
 .cmdk__results {
@@ -3062,7 +3062,7 @@ button {
   transition: background 0.25s;
 }
 .cmdk__row:hover {
-  background: rgba(150, 255, 185, 0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 .cmdk__row b {
   display: block;
@@ -3118,8 +3118,8 @@ button {
   max-width: 380px;
   padding: 18px 20px;
   border-radius: 22px;
-  background: #03100a;
-  box-shadow: inset 0 0 0 1px rgba(0, 255, 102, 0.45), 0 40px 100px -20px rgba(0, 0, 0, 0.9), 0 0 60px -20px var(--accent-glow);
+  background: #0f131a;
+  box-shadow: inset 0 0 0 1px rgba(251, 94, 40, 0.45), 0 40px 100px -20px rgba(0, 0, 0, 0.9), 0 0 60px -20px var(--accent-glow);
   transform: translateX(130%);
   opacity: 0;
   pointer-events: none;
@@ -3138,7 +3138,7 @@ button {
   place-items: center;
   border-radius: 50%;
   background: var(--accent);
-  color: #000a04;
+  color: #090c12;
 }
 .toast__body {
   flex: 1;
@@ -3200,7 +3200,7 @@ button {
   font: 600 clamp(22px, min(13cqh, 8cqw), 46px) var(--f-display);
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: #d4ffe0;
+  color: #f2f2ef;
   text-wrap: balance;
 }
 .arttext__meta {
@@ -3210,7 +3210,7 @@ button {
   gap: 6px 20px;
   margin: 16px 0 0;
   font: 500 clamp(11px, 0.95vw, 13px) var(--f-body);
-  color: rgba(212, 255, 224, 0.62);
+  color: rgba(242, 242, 239, 0.62);
 }
 .arttext__status {
   display: inline-flex;
@@ -3219,14 +3219,14 @@ button {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(212, 255, 224, 0.88);
+  color: rgba(242, 242, 239, 0.88);
 }
 .arttext__status i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #7dffb0;
-  box-shadow: 0 0 10px #7dffb0;
+  background: #34d399;
+  box-shadow: 0 0 10px #34d399;
 }
 .arttext__tags {
   min-width: 0;
@@ -3240,7 +3240,7 @@ button {
   width: 100%;
   border-radius: var(--r);
   overflow: hidden;
-  box-shadow: 0 40px 100px -30px rgba(var(--c), 0.55), 0 0 0 1px rgba(150, 255, 185, 0.07);
+  box-shadow: 0 40px 100px -30px rgba(var(--c), 0.55), 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .viewer__panel--video {
   width: min(1500px, 100%);
@@ -3251,7 +3251,7 @@ button {
   }
 }
 .viewer__card--video {
-  background: #000401;
+  background: #05070a;
   aspect-ratio: 16 / 9;
   /* never taller than the panel can hold, so the count and arrows below stay clear of it */
   width: min(100%, calc((100dvh - 2 * var(--m) - 190px) * 16 / 9));
@@ -3279,8 +3279,8 @@ button {
   align-items: center;
   gap: 12px;
   padding: 30px 16px 12px;
-  background: linear-gradient(to top, rgba(0, 4, 1, 0.88), transparent);
-  color: #d4ffe0;
+  background: linear-gradient(to top, rgba(5, 7, 10, 0.88), transparent);
+  color: #f2f2ef;
 }
 .vbar__btn {
   flex: none;
@@ -3293,14 +3293,14 @@ button {
   transition: background 0.2s;
 }
 .vbar__btn:hover {
-  background: rgba(150, 255, 185, 0.16);
+  background: rgba(255, 255, 255, 0.16);
 }
 .vbar__time {
   flex: none;
   font: 600 12px var(--f-body);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
-  color: rgba(212, 255, 224, 0.8);
+  color: rgba(242, 242, 239, 0.8);
 }
 .vbar__seek {
   flex: 1;
@@ -3314,12 +3314,12 @@ button {
 .vbar__seek::-webkit-slider-runnable-track {
   height: 3px;
   border-radius: 2px;
-  background: linear-gradient(to right, var(--accent) var(--p, 0%), rgba(150, 255, 185, 0.28) var(--p, 0%));
+  background: linear-gradient(to right, var(--accent) var(--p, 0%), rgba(255, 255, 255, 0.28) var(--p, 0%));
 }
 .vbar__seek::-moz-range-track {
   height: 3px;
   border-radius: 2px;
-  background: rgba(150, 255, 185, 0.28);
+  background: rgba(255, 255, 255, 0.28);
 }
 .vbar__seek::-moz-range-progress {
   height: 3px;
@@ -3332,14 +3332,14 @@ button {
   height: 12px;
   margin-top: -4.5px;
   border-radius: 50%;
-  background: #d4ffe0;
+  background: #f2f2ef;
 }
 .vbar__seek::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border: 0;
   border-radius: 50%;
-  background: #d4ffe0;
+  background: #f2f2ef;
 }
 .viewer__card--video video {
   cursor: pointer;
@@ -3347,7 +3347,7 @@ button {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #000401;
+  background: #05070a;
 }
 .viewer__card canvas {
   display: block;
@@ -3363,7 +3363,7 @@ button {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: rgba(0, 8, 3, 0.5);
+  background: rgba(8, 11, 17, 0.5);
 }
 .hero__stage::after {
   content: '';
@@ -3399,7 +3399,7 @@ button {
 .hud__frame {
   position: absolute;
   inset: var(--hm);
-  border: 1px solid rgba(150, 255, 185, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .hud__x {
   position: absolute;
@@ -3410,7 +3410,7 @@ button {
 .hud__x::after {
   content: '';
   position: absolute;
-  background: rgba(150, 255, 185, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 .hud__x::before {
   left: 7px;
@@ -3480,7 +3480,7 @@ button {
   display: block;
   width: 1px;
   height: 44px;
-  background: rgba(150, 255, 185, 0.18);
+  background: rgba(255, 255, 255, 0.18);
   overflow: hidden;
 }
 .hud__line::after {
@@ -3524,7 +3524,7 @@ button {
 .warp__veil {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--x) var(--y), rgba(var(--c), 0.5), rgba(var(--c), 0.08) 38%, transparent 62%), #000602;
+  background: radial-gradient(circle at var(--x) var(--y), rgba(var(--c), 0.5), rgba(var(--c), 0.08) 38%, transparent 62%), #070a0f;
   clip-path: circle(0px at var(--x) var(--y));
   transition: clip-path 0.76s cubic-bezier(0.76, 0, 0.24, 1);
 }
@@ -3600,7 +3600,7 @@ button {
   width: min(220px, 50vw);
   height: 2px;
   margin: 22px auto 0;
-  background: rgba(150, 255, 185, 0.12);
+  background: rgba(255, 255, 255, 0.12);
   position: relative;
   overflow: hidden;
 }

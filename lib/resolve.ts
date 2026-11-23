@@ -158,20 +158,20 @@ export class ArtStage {
       ctx.restore();
       // the scan line itself
       const grad = ctx.createLinearGradient(edge - 40, 0, edge + 2, 0);
-      grad.addColorStop(0, 'rgba(0, 255, 102,0)');
-      grad.addColorStop(1, 'rgba(0, 255, 102,0.5)');
+      grad.addColorStop(0, 'rgba(251, 94, 40,0)');
+      grad.addColorStop(1, 'rgba(251, 94, 40,0.5)');
       ctx.fillStyle = grad;
       ctx.fillRect(edge - 40, 0, 42, h);
-      ctx.fillStyle = '#00ff66';
+      ctx.fillStyle = '#fb5e28';
       ctx.fillRect(edge, 0, 1.5, h);
     }
 
     // pointer spotlight
     if (this.px > -1000) {
       const g = ctx.createRadialGradient(this.px, this.py, 0, this.px, this.py, 200);
-      g.addColorStop(0, 'rgba(150, 255, 185,0.13)');
-      g.addColorStop(0.45, 'rgba(0, 255, 102,0.07)');
-      g.addColorStop(1, 'rgba(0, 255, 102,0)');
+      g.addColorStop(0, 'rgba(255, 255, 255,0.13)');
+      g.addColorStop(0.45, 'rgba(251, 94, 40,0.07)');
+      g.addColorStop(1, 'rgba(251, 94, 40,0)');
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       ctx.fillStyle = g;
