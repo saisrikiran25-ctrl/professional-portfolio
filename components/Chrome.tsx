@@ -46,7 +46,7 @@ float fbm(vec2 p){
   return v;
 }
 
-// stars on the sky sphere, found by direction so the lensed rays can look them up
+// stars on the sky sphere, looked up by direction so lensed rays can find them
 vec3 stars(vec3 d){
   vec3 col = vec3(0.0);
   for (int l = 0; l < 3; l++){
@@ -64,7 +64,6 @@ vec3 stars(vec3 d){
     vec3 tint = mix(vec3(0.75, 0.85, 1.0), vec3(1.0, 0.8, 0.65), hash(id.xy + id.z * 2.3));
     col += s * tint * (0.5 + 1.3 * hash(id.xy - id.z));
   }
-  // a faint dusty band of galaxy
   vec3 nrm = normalize(vec3(0.35, 1.0, 0.25));
   float band = exp(-pow(dot(d, nrm) / 0.2, 2.0));
   float dust = fbm(vec2(d.x * 4.0 + d.z * 2.0, d.y * 4.0 + d.z * 3.0) * 1.6);
@@ -72,9 +71,13 @@ vec3 stars(vec3 d){
   return col;
 }
 
-// the glowing disk at a point (radius r, position hp), seen from direction n (towards the camera)
-vec3 diskColor(float r, vec3 hp, vec3 nObs, float rin, float rout, float inten, out float dens){
-  float edge = smoothstep(rin, rin * 1.12, r) * (1.0 - smoothstep(rout * 0.72, rout, r));
+// scene, set once per pixel in main()
+float gD, gInten, gRin, gRout, gFs, gPx;
+vec3 gP, gFwd, gR2, gU2;
+
+// the glowing disk at a point (radius r, position hp), seen along nObs (towards the camera)
+vec3 diskColor(float r, vec3 hp, vec3 nObs, out float dens){
+  float edge = smoothstep(gRin, gRin * 1.12, r) * (1.0 - smoothstep(gRout * 0.72, gRout, r));
   float ang = atan(hp.z, hp.x);
   float om = 3.2 / (r * sqrt(r));              // Keplerian: the inside turns faster
   float a = ang - u_t * om;
@@ -83,66 +86,48 @@ vec3 diskColor(float r, vec3 hp, vec3 nObs, float rin, float rout, float inten, 
   float fine = noise(vec2(a * 18.0, r * 4.0 - u_t * 0.5));
   float texture = 0.25 + 1.1 * n + 0.35 * fine;
   dens = edge * clamp(0.35 + 0.9 * n, 0.0, 1.0);
-  // the matter moves round the hole: the side coming at us is brighter and bluer
+  // gas on a circular orbit, speed measured by a static observer: v = sqrt(M / (r - 2M))
   vec3 vdir = normalize(cross(vec3(0.0, 1.0, 0.0), hp));
-  float vm = sqrt(1.0 / r) * 0.95;
-  float g = sqrt(max(0.02, 1.0 - 2.0 / r)) / (1.0 - vm * dot(vdir, nObs));
-  g = clamp(g, 0.35, 1.9);
-  float temp = clamp(pow(rin / r, 0.8) * g, 0.0, 1.6);
+  float vm = min(0.82, sqrt(1.0 / max(r - 2.0, 0.2)));
+  float gamma = 1.0 / sqrt(1.0 - vm * vm);
+  float g = sqrt(max(0.02, 1.0 - 2.0 / r)) / (gamma * (1.0 - vm * dot(vdir, nObs)));   // Doppler and gravitational shift
+  g = clamp(g, 0.25, 2.2);
+  float temp = clamp(pow(gRin / r, 0.8) * g, 0.0, 1.6);
   vec3 cool = vec3(1.0, 0.3, 0.07);
   vec3 warm = vec3(1.0, 0.72, 0.38);
   vec3 white = vec3(1.0, 0.95, 0.88);
   vec3 c = mix(cool, warm, smoothstep(0.2, 0.7, temp));
   c = mix(c, white, smoothstep(0.7, 1.3, temp));
-  float light = pow(g, 2.6) * (0.15 + 1.9 * pow(rin / r, 1.7));
-  return c * light * texture * inten;
+  float light = pow(g, 3.0) * (0.15 + 1.9 * pow(gRin / r, 1.7));
+  return c * light * texture * gInten;
 }
 
-void main(){
-  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
-  float prog = clamp(u_prog, 0.0, 1.0);
-  float fall = clamp(u_fall, 0.0, 1.0);
-
-  // camera: far away, nearly in the disk's plane, drifting a little; the fall drops it in
-  float D = mix(46.0 - 6.0 * prog, 2.7, pow(fall, 1.7));
-  float incl = radians(84.0 - 3.0 * prog + 1.1 * sin(u_t * 0.21) - 6.0 * fall);
-  vec3 P = D * vec3(0.0, cos(incl), -sin(incl));
-  vec3 fwd = -normalize(P);
-  vec3 right = normalize(cross(fwd, vec3(0.0, 1.0, 0.0)));
-  vec3 upv = cross(right, fwd);
-  float roll = 0.04 * sin(u_t * 0.17) + 0.25 * fall;
-  vec3 r2 = right * cos(roll) + upv * sin(roll);
-  vec3 u2 = upv * cos(roll) - right * sin(roll);
-  float aspect = u_res.x / u_res.y;
-  float fs = 0.74 * max(1.0, 1.15 / aspect);
-  vec3 rd = normalize(fwd + (uv.x * r2 + uv.y * u2) * fs);
-
-  // light travels in a plane through the hole: u = 1/r obeys u'' = -u + 3u^2 (in units of M)
-  vec3 e1 = normalize(P);
+// one light ray: bent through the Schwarzschild metric, u = 1/r obeys u'' = -u + 3u^2 (M = 1)
+vec3 trace(vec2 uv, out float bOut){
+  vec3 rd = normalize(gFwd + (uv.x * gR2 + uv.y * gU2) * gFs);
+  vec3 e1 = normalize(gP);
   float cosP = -dot(rd, e1);
   vec3 perp = rd + cosP * e1;
   float sinP = length(perp);
-  float inten = smoothstep(0.0, 0.25, prog) * (0.4 + 0.6 * prog);
-  inten *= 1.0 + 1.6 * u_flare;
-  float rin = 3.1;
-  float rout = 6.5 + 8.0 * prog;
-
+  bOut = gD * sinP;
   vec3 acc = vec3(0.0);
   float T = 1.0;
-  vec3 bg = vec3(0.0);
   bool escaped = false;
-
+  vec3 bg = vec3(0.0);
   if (sinP > 1e-4){
     vec3 e2 = perp / sinP;
-    float u0 = 1.0 / D;
-    float u = u0;
-    float v = u0 * cosP / sinP;
-    float dphi = 0.06;
-    float cd = cos(dphi), sd = sin(dphi);
+    float u = 1.0 / gD;
+    float v = u * cosP / sinP;
+    float cdA = cos(0.07), sdA = sin(0.07);
+    float cdB = cos(0.04), sdB = sin(0.04);
     float c = 1.0, s = 0.0;
-    vec3 prev = P;
-    float prevY = P.y;
-    for (int i = 0; i < 150; i++){
+    vec3 prev = gP;
+    float prevY = gP.y;
+    for (int i = 0; i < 170; i++){
+      bool near = u > 0.2;                          // finer steps close to the photon sphere
+      float dphi = near ? 0.04 : 0.07;
+      float cd = near ? cdB : cdA;
+      float sd = near ? sdB : sdA;
       float a1 = -u + 3.0 * u * u;
       float um = u + 0.5 * dphi * v;
       float vm = v + 0.5 * dphi * a1;
@@ -152,24 +137,25 @@ void main(){
       float c2 = c * cd - s * sd;
       s = s * cd + c * sd;
       c = c2;
-      if (u > 0.5) break;                         // inside the horizon
+      if (u > 0.5) break;                           // inside the horizon
       float r = 1.0 / u;
       vec3 pos = r * (c * e1 + s * e2);
-      if (prevY * pos.y < 0.0 && T > 0.02){
+      if (prevY * pos.y < 0.0){
         float t = prevY / (prevY - pos.y);
         vec3 hp = mix(prev, pos, t);
         float rh = length(hp);
-        if (rh > rin && rh < rout){
+        if (rh > gRin && rh < gRout){
           vec3 tang = (-v / (u * u)) * (c * e1 + s * e2) + r * (-s * e1 + c * e2);
           vec3 nObs = -normalize(tang);
           float dens;
-          vec3 dc = diskColor(rh, hp, nObs, rin, rout, inten, dens);
+          vec3 dc = diskColor(rh, hp, nObs, dens);
           acc += T * dc * dens;
           T *= 1.0 - 0.62 * dens;
         }
       }
       prev = pos;
       prevY = pos.y;
+      if (T < 0.02) break;
       if (v < 0.0 && u < 0.055){
         vec3 tang = (-v / (u * u)) * (c * e1 + s * e2) + r * (-s * e1 + c * e2);
         bg = stars(normalize(tang));
@@ -178,25 +164,64 @@ void main(){
       }
     }
   }
-  vec3 col = acc + (escaped ? bg * T : vec3(0.0));
+  return acc + (escaped ? bg * T : vec3(0.0));
+}
 
-  // the thin, bright ring of light that grazes the horizon
-  float b = D * sinP;
-  float ring = exp(-pow((b - 5.196) / 0.085, 2.0));
-  col += vec3(1.0, 0.82, 0.62) * ring * (0.1 + 0.32 * inten + 1.4 * u_flare);
-  col += vec3(1.0, 0.38, 0.12) * exp(-abs(b - 5.2) * 0.22) * 0.018 * inten;
+void main(){
+  vec2 px = gl_FragCoord.xy - 0.5 * u_res;
+  float H = u_res.y;
+  float prog = clamp(u_prog, 0.0, 1.0);
+  float fall = clamp(u_fall, 0.0, 1.0);
+
+  // camera: far away, nearly in the disk's plane, drifting a little; the fall drops it in
+  gD = mix(46.0 - 6.0 * prog, 2.7, pow(fall, 1.7));
+  float incl = radians(84.0 - 3.0 * prog + 1.1 * sin(u_t * 0.21) - 6.0 * fall);
+  gP = gD * vec3(0.0, cos(incl), -sin(incl));
+  gFwd = -normalize(gP);
+  vec3 right = normalize(cross(gFwd, vec3(0.0, 1.0, 0.0)));
+  vec3 upv = cross(right, gFwd);
+  float roll = 0.04 * sin(u_t * 0.17) + 0.25 * fall;
+  gR2 = right * cos(roll) + upv * sin(roll);
+  gU2 = upv * cos(roll) - right * sin(roll);
+  float aspect = u_res.x / H;
+  gFs = 0.74 * max(1.0, 1.15 / aspect);
+  gPx = gD * gFs / H;                              // size of one pixel at the impact-parameter plane
+  gInten = smoothstep(0.0, 0.25, prog) * (0.4 + 0.6 * prog) * (1.0 + 1.6 * u_flare);
+  gRin = 3.2;
+  gRout = 6.5 + 8.0 * prog;
+
+  // the shadow edge and the photon ring are razor thin: take four samples there, one elsewhere
+  float b0;
+  vec3 col = trace(px / H, b0);
+  float edge = abs(b0 - 5.196);
+  if (edge < max(0.7, 3.0 * gPx)){
+    for (int k = 0; k < 3; k++){
+      vec2 o = k == 0 ? vec2(-0.375, 0.125) : (k == 1 ? vec2(0.125, 0.375) : vec2(0.375, -0.125));
+      float bk;
+      col += trace((px + o) / H, bk);
+    }
+    col *= 0.25;
+  }
+
+  // the thin, bright ring of light that grazes the horizon (kept at least a pixel wide)
+  float w = max(0.085, 1.4 * gPx);
+  float ring = exp(-pow((b0 - 5.196) / w, 2.0)) * (0.085 / w);
+  col += vec3(1.0, 0.82, 0.62) * ring * (0.1 + 0.32 * gInten + 1.4 * u_flare);
+  col += vec3(1.0, 0.38, 0.12) * exp(-abs(b0 - 5.2) * 0.22) * 0.018 * gInten;
 
   // plunge: everything falls to black
   col *= 1.0 - smoothstep(0.8, 1.0, fall);
   col = 1.0 - exp(-col * 1.25);
-  col *= 1.0 - 0.4 * smoothstep(0.4, 1.15, length(uv));
-  gl_FragColor = vec4(pow(col, vec3(0.9)), 1.0);
+  col *= 1.0 - 0.4 * smoothstep(0.4, 1.15, length(px / H));
+  col = pow(col, vec3(0.9));
+  col += (hash(gl_FragCoord.xy + fract(u_t) * 91.0) - 0.5) / 255.0;   // dither: no banding in the dark
+  gl_FragColor = vec4(col, 1.0);
 }
 `;
 
 /**
- * The intro. A black hole spins up as the site loads (its accretion disk brightens and speeds
- * up with the real asset loading, creeping toward ~88% and finishing when everything is ready),
+ * The intro. A ray-traced black hole spins up as the site loads (the disk brightens and widens
+ * with the real asset loading, creeping toward ~88% and finishing when everything is ready),
  * the ring flares, and the camera falls in; the name is stretched toward the hole on the way.
  * A small readout and a skip control sit at the edges. With reduced motion there is no fall:
  * a still hole and a quick iris. Without WebGL a CSS hole stands in.
@@ -225,42 +250,52 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
 
     let prog: WebGLProgram | null = null;
     let uni: Record<string, WebGLUniformLocation | null> = {};
+    let linkedOk = false; // the program is compiled, linked and set up
+    let failed = false;
+    // Compile without blocking the page where the browser allows it, and only start drawing once
+    // the program is ready, so the intro never hitches on the first frame.
+    const par = gl ? (gl.getExtension('KHR_parallel_shader_compile') as { COMPLETION_STATUS_KHR: number } | null) : null;
     if (gl) {
       const sh = (type: number, src: string) => {
         const s = gl.createShader(type)!;
         gl.shaderSource(s, src);
         gl.compileShader(s);
-        return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+        return s;
       };
-      const vs = sh(gl.VERTEX_SHADER, BH_VS);
-      const fs = sh(gl.FRAGMENT_SHADER, BH_FS);
-      if (vs && fs) {
-        prog = gl.createProgram()!;
-        gl.attachShader(prog, vs);
-        gl.attachShader(prog, fs);
-        gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) prog = null;
-      }
-      if (prog) {
-        gl.useProgram(prog);
-        const buf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-        const loc = gl.getAttribLocation(prog, 'a');
-        gl.enableVertexAttribArray(loc);
-        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-        for (const n of ['u_res', 'u_t', 'u_prog', 'u_fall', 'u_flare']) uni[n] = gl.getUniformLocation(prog, n);
-      }
+      prog = gl.createProgram()!;
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, BH_VS));
+      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, BH_FS));
+      gl.linkProgram(prog);
     }
-    if (!gl || !prog) setNoGL(true);
+    const finishSetup = () => {
+      if (!gl || !prog || linkedOk || failed) return;
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        failed = true;
+        setNoGL(true);
+        return;
+      }
+      gl.useProgram(prog);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'a');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      for (const n of ['u_res', 'u_t', 'u_prog', 'u_fall', 'u_flare']) uni[n] = gl.getUniformLocation(prog, n);
+      linkedOk = true;
+    };
+    if (!gl) setNoGL(true);
+    else if (!par) finishSetup();
 
-    // The shader traces every pixel, so it renders at a capped pixel count and the browser
-    // scales it up smoothly; if frames run slow it steps the count down further.
-    let quality = 1;
+    // The shader traces every pixel, so it renders at a pixel budget and the browser scales it up
+    // smoothly. A governor steps the budget down if frames run slow, and starts lower on
+    // modest hardware, so the motion stays fluid.
+    const cores = navigator.hardwareConcurrency || 4;
+    let quality = cores >= 8 ? 1 : cores >= 6 ? 0.8 : 0.6;
     const resize = () => {
       const cw = Math.max(1, cv.clientWidth);
       const ch = Math.max(1, cv.clientHeight);
-      const k = Math.min(1, Math.sqrt((1_150_000 * quality) / (cw * ch)));
+      const k = Math.min(1, Math.sqrt((1_600_000 * quality) / (cw * ch)));
       cv.width = Math.max(2, Math.round(cw * k));
       cv.height = Math.max(2, Math.round(ch * k));
       if (gl) gl.viewport(0, 0, cv.width, cv.height);
@@ -283,20 +318,22 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      const dtF = lastNow ? (now - lastNow) / 1000 : 0.016;
+      const dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0.016;
       lastNow = now;
-      if (dtF < 0.5) {
-        ema = ema * 0.92 + dtF * 0.08;
-        if (++nFrames % 40 === 0 && ema > 0.034 && quality > 0.3) {
-          quality *= 0.75;
-          resize();
-        }
+      // governor: if the average frame is slower than ~28 fps, shrink the render and look again
+      ema = ema * 0.9 + dt * 0.1;
+      if (linkedOk && ++nFrames % 30 === 0 && ema > 0.036 && quality > 0.25) {
+        quality *= 0.78;
+        resize();
       }
+      if (gl && par && !linkedOk && !failed && gl.getProgramParameter(prog!, par.COMPLETION_STATUS_KHR)) finishSetup();
+
       const t = (now - start) / 1000;
-      // creep toward ~88% while loading; once loaded (and shown for a moment) charge to 100
+      // creep toward ~88% while loading; once loaded (and shown for a moment) charge to 100.
+      // Eased by time, not by frame, so it looks the same at any refresh rate.
       const ready = doneRef.current && (t > 1.8 || skipRef.current);
       const target = ready ? 100 : Math.min(88, 8 + t * 34);
-      pct += (target - pct) * (ready ? 0.1 : 0.06);
+      pct += (target - pct) * (1 - Math.exp(-dt * (ready ? 6.5 : 3.6)));
       if (ready && pct > 99.4) pct = 100;
       if (reduced) pct = ready ? 100 : Math.min(88, pct);
 
@@ -304,7 +341,7 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
       const flare = flareStart < 0 ? 0 : Math.sin(Math.PI * clamp01((now - flareStart) / 900));
       const fall = !reduced && flareStart >= 0 ? clamp01((now - flareStart - 450) / 1250) : 0;
 
-      if (gl && prog) {
+      if (gl && prog && linkedOk) {
         gl.uniform2f(uni.u_res, cv.width, cv.height);
         gl.uniform1f(uni.u_t, reduced ? 2.0 : t);
         gl.uniform1f(uni.u_prog, pct / 100);
@@ -312,6 +349,7 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
         gl.uniform1f(uni.u_flare, flare);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
+
       // sound (only if the visitor switched it on): a drone that swells with the load, a chime at
       // the flare, and a rush and boom as the camera falls in
       if (sound.on) {
