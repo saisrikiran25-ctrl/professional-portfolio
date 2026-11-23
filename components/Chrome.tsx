@@ -20,10 +20,12 @@ const PRE_LABELS: [number, string][] = [
 const BH_VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
 /**
- * A black hole drawn analytically in one fragment shader: a lensed starfield (light bends around
- * the horizon), a tilted accretion disk with Doppler-brightened streaks, a lensed arc of the far
- * side of the disk, and a photon ring. u_prog (0..1) spins the disk up as the site loads, u_flare
- * flashes the ring at 100%, and u_fall (0..1) drops the camera into the singularity.
+ * A black hole traced pixel by pixel in one fragment shader. Each camera ray is bent through
+ * the Schwarzschild metric (u = 1/r obeys u'' = -u + 3u^2), so the shadow, the Einstein ring,
+ * the warped stars and the accretion disk wrapping over and under the hole all fall out of the
+ * physics, as in the film's Gargantua. The disk is lit with Doppler beaming and redshift, and
+ * turbulent matter turns faster nearer in. u_prog (0..1) brightens and widens the disk as the
+ * site loads, u_flare flashes the photon ring at 100%, and u_fall (0..1) drops the camera in.
  */
 const BH_FS = `
 precision highp float;
@@ -43,76 +45,152 @@ float fbm(vec2 p){
   for (int i = 0; i < 4; i++){ v += a * noise(p); p = p * 2.03 + vec2(11.7, 3.1); a *= 0.5; }
   return v;
 }
-vec3 stars(vec2 p){
+
+// stars on the sky sphere, found by direction so the lensed rays can look them up
+vec3 stars(vec3 d){
   vec3 col = vec3(0.0);
   for (int l = 0; l < 3; l++){
     float fl = float(l);
-    vec2 g = p * (16.0 + fl * 24.0) + vec2(fl * 17.3, fl * 5.1);
-    vec2 id = floor(g), f = fract(g) - 0.5;
-    float h = hash(id + fl * 7.1);
-    float on = step(0.935, h);
-    vec2 off = vec2(hash(id + 3.3), hash(id + 8.8)) - 0.5;
-    float d = length(f - off * 0.6);
-    float tw = 0.65 + 0.35 * sin(u_t * (1.5 + h * 3.0) + h * 40.0);
-    float s = on * smoothstep(0.085 / (1.0 + fl * 0.45), 0.0, d) * tw;
-    vec3 tint = mix(vec3(0.7, 0.8, 1.0), vec3(1.0, 0.8, 0.6), hash(id + 1.7));
-    col += s * tint * (0.45 + h);
+    float sc = 60.0 + fl * 55.0 + fl * fl * 12.0;
+    vec3 g = d * sc;
+    vec3 id = floor(g);
+    vec3 f = g - id;
+    float h = hash(id.xy + id.z * 17.13 + fl * 3.7);
+    float on = step(0.962 + fl * 0.006, h);
+    vec3 off = 0.3 + 0.4 * vec3(hash(id.xy + 1.3 + id.z), hash(id.yz + 7.7 + id.x), hash(id.zx + 3.1 + id.y));
+    float dd = length(f - off);
+    float tw = 0.72 + 0.28 * sin(u_t * (1.2 + h * 3.0) + h * 50.0);
+    float s = on * smoothstep(0.21, 0.0, dd) * tw;
+    vec3 tint = mix(vec3(0.75, 0.85, 1.0), vec3(1.0, 0.8, 0.65), hash(id.xy + id.z * 2.3));
+    col += s * tint * (0.5 + 1.3 * hash(id.xy - id.z));
   }
+  // a faint dusty band of galaxy
+  vec3 nrm = normalize(vec3(0.35, 1.0, 0.25));
+  float band = exp(-pow(dot(d, nrm) / 0.2, 2.0));
+  float dust = fbm(vec2(d.x * 4.0 + d.z * 2.0, d.y * 4.0 + d.z * 3.0) * 1.6);
+  col += vec3(0.05, 0.036, 0.04) * band * (0.4 + dust);
   return col;
 }
+
+// the glowing disk at a point (radius r, position hp), seen from direction n (towards the camera)
+vec3 diskColor(float r, vec3 hp, vec3 nObs, float rin, float rout, float inten, out float dens){
+  float edge = smoothstep(rin, rin * 1.12, r) * (1.0 - smoothstep(rout * 0.72, rout, r));
+  float ang = atan(hp.z, hp.x);
+  float om = 3.2 / (r * sqrt(r));              // Keplerian: the inside turns faster
+  float a = ang - u_t * om;
+  vec2 q = vec2(cos(a), sin(a)) * r;
+  float n = fbm(q * 0.85) * 0.75 + fbm(q * 2.6 + 7.0) * 0.45;
+  float fine = noise(vec2(a * 18.0, r * 4.0 - u_t * 0.5));
+  float texture = 0.25 + 1.1 * n + 0.35 * fine;
+  dens = edge * clamp(0.35 + 0.9 * n, 0.0, 1.0);
+  // the matter moves round the hole: the side coming at us is brighter and bluer
+  vec3 vdir = normalize(cross(vec3(0.0, 1.0, 0.0), hp));
+  float vm = sqrt(1.0 / r) * 0.95;
+  float g = sqrt(max(0.02, 1.0 - 2.0 / r)) / (1.0 - vm * dot(vdir, nObs));
+  g = clamp(g, 0.35, 1.9);
+  float temp = clamp(pow(rin / r, 0.8) * g, 0.0, 1.6);
+  vec3 cool = vec3(1.0, 0.3, 0.07);
+  vec3 warm = vec3(1.0, 0.72, 0.38);
+  vec3 white = vec3(1.0, 0.95, 0.88);
+  vec3 c = mix(cool, warm, smoothstep(0.2, 0.7, temp));
+  c = mix(c, white, smoothstep(0.7, 1.3, temp));
+  float light = pow(g, 2.6) * (0.15 + 1.9 * pow(rin / r, 1.7));
+  return c * light * texture * inten;
+}
+
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
-  float fall = clamp(u_fall, 0.0, 1.0);
-  float zoom = mix(1.0, 0.03, pow(fall, 2.3));
-  vec2 p = uv * zoom;
-  float rs = 0.105;
-  float r = length(p);
-
-  // the starfield, bent around the hole
-  vec2 pl = p * (1.0 - 2.4 * rs * rs / (r * r + 0.0008));
-  float ca = cos(u_t * 0.03), sa = sin(u_t * 0.03);
-  pl = mat2(ca, -sa, sa, ca) * pl;
-  vec3 col = stars(pl);
-  col += vec3(0.03, 0.014, 0.02) * fbm(pl * 3.0 + u_t * 0.02) * 0.9;
-
   float prog = clamp(u_prog, 0.0, 1.0);
-  float inten = smoothstep(0.0, 0.2, prog) * (0.28 + 0.72 * prog);
-  float inHole = 1.0 - smoothstep(rs * 0.97, rs, r);
-  col *= 1.0 - inHole;
+  float fall = clamp(u_fall, 0.0, 1.0);
 
-  // accretion disk, tilted nearly edge-on
-  vec2 q = vec2(p.x, p.y / 0.27);
-  float rd = length(q);
-  float rin = rs * 1.55;
-  float rout = rs * (2.3 + 3.8 * prog);
-  float band = smoothstep(rin, rin + 0.012, rd) * (1.0 - smoothstep(rout * 0.55, rout, rd));
-  float ang = atan(q.y, q.x);
-  float spin = u_t * (0.5 + 2.4 * prog) * (0.6 / (rd + 0.05));
-  float streak = 0.3 + 0.95 * fbm(vec2(ang * 5.0 + spin * 6.0 + rd * 18.0, rd * 17.0));
-  float temp = clamp((rout - rd) / (rout - rin), 0.0, 1.0);
-  vec3 hot = mix(vec3(1.0, 0.33, 0.1), vec3(1.0, 0.93, 0.82), pow(temp, 1.7));
-  float doppler = 0.55 + 0.85 * smoothstep(-0.6, 0.6, -p.x / max(rout, 0.001));
-  vec3 disk = hot * streak * band * doppler * inten * (1.7 * pow(temp, 1.2) + 0.22);
-  float front = smoothstep(0.0, -0.012, p.y);
-  col += disk * mix(1.0 - inHole, 1.0, front);
+  // camera: far away, nearly in the disk's plane, drifting a little; the fall drops it in
+  float D = mix(46.0 - 6.0 * prog, 2.7, pow(fall, 1.7));
+  float incl = radians(84.0 - 3.0 * prog + 1.1 * sin(u_t * 0.21) - 6.0 * fall);
+  vec3 P = D * vec3(0.0, cos(incl), -sin(incl));
+  vec3 fwd = -normalize(P);
+  vec3 right = normalize(cross(fwd, vec3(0.0, 1.0, 0.0)));
+  vec3 upv = cross(right, fwd);
+  float roll = 0.04 * sin(u_t * 0.17) + 0.25 * fall;
+  vec3 r2 = right * cos(roll) + upv * sin(roll);
+  vec3 u2 = upv * cos(roll) - right * sin(roll);
+  float aspect = u_res.x / u_res.y;
+  float fs = 0.74 * max(1.0, 1.15 / aspect);
+  vec3 rd = normalize(fwd + (uv.x * r2 + uv.y * u2) * fs);
 
-  // the far side of the disk, bent over and under the hole
-  float arcW = exp(-pow((r - rs * 1.3) / (rs * 0.24), 2.0));
-  float arcDir = 0.35 + 0.65 * smoothstep(0.0, 0.9, abs(p.y) / max(r, 0.001));
-  float arcStreak = 0.4 + 0.9 * fbm(vec2(atan(p.y, p.x) * 4.0 - u_t * (0.4 + 1.6 * prog), r * 30.0));
-  col += mix(vec3(1.0, 0.4, 0.14), vec3(1.0, 0.9, 0.8), 0.45) * arcW * arcDir * arcStreak * inten * 1.25;
+  // light travels in a plane through the hole: u = 1/r obeys u'' = -u + 3u^2 (in units of M)
+  vec3 e1 = normalize(P);
+  float cosP = -dot(rd, e1);
+  vec3 perp = rd + cosP * e1;
+  float sinP = length(perp);
+  float inten = smoothstep(0.0, 0.25, prog) * (0.4 + 0.6 * prog);
+  inten *= 1.0 + 1.6 * u_flare;
+  float rin = 3.1;
+  float rout = 6.5 + 8.0 * prog;
 
-  // photon ring, a glow, and the flare as the hole opens
-  float ring = exp(-pow((r - rs * 1.02) / (rs * 0.035), 2.0));
-  col += vec3(1.0, 0.86, 0.72) * ring * (0.5 + 3.2 * u_flare) * (0.35 + 0.65 * inten);
-  col += vec3(1.0, 0.36, 0.12) * exp(-r * 3.4) * 0.16 * inten;
-  col += vec3(1.0, 0.9, 0.78) * u_flare * exp(-pow((r - rs * 1.2) / (rs * 0.6), 2.0)) * 0.9;
+  vec3 acc = vec3(0.0);
+  float T = 1.0;
+  vec3 bg = vec3(0.0);
+  bool escaped = false;
+
+  if (sinP > 1e-4){
+    vec3 e2 = perp / sinP;
+    float u0 = 1.0 / D;
+    float u = u0;
+    float v = u0 * cosP / sinP;
+    float dphi = 0.06;
+    float cd = cos(dphi), sd = sin(dphi);
+    float c = 1.0, s = 0.0;
+    vec3 prev = P;
+    float prevY = P.y;
+    for (int i = 0; i < 150; i++){
+      float a1 = -u + 3.0 * u * u;
+      float um = u + 0.5 * dphi * v;
+      float vm = v + 0.5 * dphi * a1;
+      float a2 = -um + 3.0 * um * um;
+      u += dphi * vm;
+      v += dphi * a2;
+      float c2 = c * cd - s * sd;
+      s = s * cd + c * sd;
+      c = c2;
+      if (u > 0.5) break;                         // inside the horizon
+      float r = 1.0 / u;
+      vec3 pos = r * (c * e1 + s * e2);
+      if (prevY * pos.y < 0.0 && T > 0.02){
+        float t = prevY / (prevY - pos.y);
+        vec3 hp = mix(prev, pos, t);
+        float rh = length(hp);
+        if (rh > rin && rh < rout){
+          vec3 tang = (-v / (u * u)) * (c * e1 + s * e2) + r * (-s * e1 + c * e2);
+          vec3 nObs = -normalize(tang);
+          float dens;
+          vec3 dc = diskColor(rh, hp, nObs, rin, rout, inten, dens);
+          acc += T * dc * dens;
+          T *= 1.0 - 0.62 * dens;
+        }
+      }
+      prev = pos;
+      prevY = pos.y;
+      if (v < 0.0 && u < 0.055){
+        vec3 tang = (-v / (u * u)) * (c * e1 + s * e2) + r * (-s * e1 + c * e2);
+        bg = stars(normalize(tang));
+        escaped = true;
+        break;
+      }
+    }
+  }
+  vec3 col = acc + (escaped ? bg * T : vec3(0.0));
+
+  // the thin, bright ring of light that grazes the horizon
+  float b = D * sinP;
+  float ring = exp(-pow((b - 5.196) / 0.085, 2.0));
+  col += vec3(1.0, 0.82, 0.62) * ring * (0.1 + 0.32 * inten + 1.4 * u_flare);
+  col += vec3(1.0, 0.38, 0.12) * exp(-abs(b - 5.2) * 0.22) * 0.018 * inten;
 
   // plunge: everything falls to black
-  col *= 1.0 - smoothstep(0.78, 1.0, fall);
-  col = 1.0 - exp(-col * 1.15);
-  col *= 1.0 - 0.45 * smoothstep(0.35, 1.1, length(uv));
-  gl_FragColor = vec4(pow(col, vec3(0.92)), 1.0);
+  col *= 1.0 - smoothstep(0.8, 1.0, fall);
+  col = 1.0 - exp(-col * 1.25);
+  col *= 1.0 - 0.4 * smoothstep(0.4, 1.15, length(uv));
+  gl_FragColor = vec4(pow(col, vec3(0.9)), 1.0);
 }
 `;
 
@@ -176,12 +254,15 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
     }
     if (!gl || !prog) setNoGL(true);
 
+    // The shader traces every pixel, so it renders at a capped pixel count and the browser
+    // scales it up smoothly; if frames run slow it steps the count down further.
+    let quality = 1;
     const resize = () => {
-      // keep the pixel count sane on very large or dense screens
-      const px = window.innerWidth * window.innerHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, px > 2_000_000 ? 1 : 1.5);
-      cv.width = Math.max(2, Math.round(cv.clientWidth * dpr));
-      cv.height = Math.max(2, Math.round(cv.clientHeight * dpr));
+      const cw = Math.max(1, cv.clientWidth);
+      const ch = Math.max(1, cv.clientHeight);
+      const k = Math.min(1, Math.sqrt((1_150_000 * quality) / (cw * ch)));
+      cv.width = Math.max(2, Math.round(cw * k));
+      cv.height = Math.max(2, Math.round(ch * k));
       if (gl) gl.viewport(0, 0, cv.width, cv.height);
     };
     resize();
@@ -193,12 +274,24 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
     let flareStart = -1;
     let leavingSet = false;
     let lastLabel = '';
+    let lastNow = 0;
+    let ema = 0.016;
+    let nFrames = 0;
     let flared = false;
     let fell = false;
     const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
+      const dtF = lastNow ? (now - lastNow) / 1000 : 0.016;
+      lastNow = now;
+      if (dtF < 0.5) {
+        ema = ema * 0.92 + dtF * 0.08;
+        if (++nFrames % 40 === 0 && ema > 0.034 && quality > 0.3) {
+          quality *= 0.75;
+          resize();
+        }
+      }
       const t = (now - start) / 1000;
       // creep toward ~88% while loading; once loaded (and shown for a moment) charge to 100
       const ready = doneRef.current && (t > 1.8 || skipRef.current);
