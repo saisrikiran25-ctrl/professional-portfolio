@@ -155,7 +155,7 @@ function paintRing(
   if (R > 150) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `600 ${Math.max(8, R * 0.034)}px "JetBrains Mono Variable", ui-monospace, monospace`;
+    ctx.font = `600 ${Math.max(8, R * 0.034)}px "Hanken Grotesk Variable", system-ui, sans-serif`;
     for (let i = 0; i < DIAL.length; i++) {
       const a = (i / DIAL.length) * TAU - Math.PI / 2;
       const on = hovered === i;

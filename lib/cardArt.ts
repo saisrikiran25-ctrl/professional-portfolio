@@ -8,8 +8,8 @@ import { Item, KIND_LABEL, rgb } from './items';
 export const CARD_W = 448;
 export const CARD_H = 252; // 16:9, the shape of the poster artwork
 
-export const FONT_DISPLAY = '"JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
-export const FONT_BODY = '"JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
+export const FONT_DISPLAY = '"Unbounded Variable", "Hanken Grotesk Variable", system-ui, sans-serif';
+export const FONT_BODY = '"Hanken Grotesk Variable", system-ui, sans-serif';
 export const FONT_MONO = FONT_BODY;
 
 type Ctx = CanvasRenderingContext2D;

@@ -30,10 +30,9 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-io: cubic-bezier(0.77, 0, 0.175, 1);
 
-  --f-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --f-display: var(--f-mono);
-  --f-body: var(--f-mono);
-  --s-body: clamp(14px, 0.12vw + 13.6px, 15.5px);
+  --f-display: 'Unbounded Variable', 'Hanken Grotesk Variable', system-ui, sans-serif;
+  --f-body: 'Hanken Grotesk Variable', system-ui, sans-serif;
+  --s-body: clamp(16px, 0.15vw + 15.4px, 17.5px);
 
   color-scheme: dark;
 }
@@ -164,7 +163,7 @@ button {
   font-weight: 600;
   font-size: clamp(30px, 4.3vw, 72px);
   line-height: 1.04;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.035em;
   text-wrap: balance;
 }
 .display--xl {
@@ -535,7 +534,7 @@ button {
   align-items: baseline;
   font: 700 clamp(22px, 3vw, 30px) var(--f-display);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 .pre__num small {
@@ -669,7 +668,7 @@ button {
   justify-self: start;
   white-space: nowrap;
   font: 200 clamp(15px, 1.2vw, 18px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 .bar__logo b {
   font-weight: 700;
@@ -790,7 +789,7 @@ button {
   gap: 18px;
   padding: 12px 0;
   font: 600 clamp(30px, 9vw, 54px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.6s, transform 0.8s var(--ease-out), color 0.25s;
@@ -1096,7 +1095,7 @@ button {
   font-weight: 200;
   font-size: clamp(14px, calc(var(--R) * 0.158), 58px);
   line-height: 1.05;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.045em;
   white-space: nowrap;
 }
 .dial__name strong {
@@ -1375,7 +1374,7 @@ button {
 }
 .list__t {
   font: 600 clamp(17px, 1.9vw, 28px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   line-height: 1.12;
 }
 .list__body {
@@ -1727,7 +1726,7 @@ button {
 .case__title {
   margin: 14px 0 0;
   font: 600 clamp(20px, 1.9vw, 28px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   line-height: 1.1;
 }
 .case__title small {
@@ -1760,7 +1759,7 @@ button {
 .case__stats dd {
   margin: 0;
   font: 700 clamp(22px, 2.2vw, 32px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   line-height: 1;
 }
 .case__stats dt {
@@ -2010,7 +2009,7 @@ button {
   display: block;
   font: 700 clamp(36px, 4.6vw, 76px) var(--f-display);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
 }
 .fact span {
@@ -2066,7 +2065,7 @@ button {
   display: flex;
   align-items: center;
   font: 200 clamp(26px, 3.4vw, 54px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   white-space: nowrap;
   color: rgba(242, 242, 239, 0.22);
 }
@@ -2110,7 +2109,7 @@ button {
   display: inline-block;
   font: 700 clamp(48px, 8.5vw, 140px) var(--f-display);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.06em;
   color: rgba(242, 242, 239, 0.07);
   will-change: transform, opacity;
 }
@@ -2219,7 +2218,7 @@ button {
   margin: 0;
   font: 600 clamp(19px, 2vw, 30px) var(--f-display);
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
 }
 .tl__sub {
   margin: 8px 0 0;
@@ -2271,7 +2270,7 @@ button {
   display: grid;
   place-items: center;
   font: 700 26px var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.05em;
 }
 .gauge__v small {
   font-size: 13px;
@@ -2294,7 +2293,7 @@ button {
 }
 .years span {
   font: 700 clamp(28px, 3.2vw, 46px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.06em;
   line-height: 1;
   color: transparent;
   -webkit-text-stroke: 1px rgba(242, 242, 239, 0.42);
@@ -2361,7 +2360,7 @@ button {
 .form-wrap__title {
   margin: 10px 0 0;
   font: 600 clamp(22px, 2.4vw, 36px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
 }
 .form-wrap__lead {
   max-width: 34rem;
@@ -2487,7 +2486,7 @@ button {
 .chan__block h4 {
   margin: 8px 0 14px;
   font: 600 clamp(16px, 1.5vw, 21px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
 }
 .chan__link {
   display: block;
@@ -2578,11 +2577,11 @@ button {
   background: var(--accent);
   color: #090c12;
   font: 700 15px var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.05em;
 }
 .brand-row__name {
   font: 600 18px var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   line-height: 1;
 }
 .brand-row__sub {
@@ -2729,7 +2728,7 @@ button {
   margin: 12px 0 0;
   font: 600 clamp(24px, 2.8vw, 42px) var(--f-display);
   line-height: 1.08;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.045em;
 }
 .viewer__info .pill {
   height: 48px;
@@ -3199,7 +3198,7 @@ button {
   margin: 0;
   font: 600 clamp(22px, min(13cqh, 8cqw), 46px) var(--f-display);
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   color: #f2f2ef;
   text-wrap: balance;
 }
@@ -3587,7 +3586,7 @@ button {
   display: block;
   margin-top: 14px;
   font: 700 clamp(34px, 8vw, 96px) var(--f-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.05em;
   line-height: 1;
   transform: scale(0.94);
   transition: transform 1.1s var(--ease-out) 0.2s;
