@@ -427,7 +427,10 @@ button {
 .pre.is-leaving .pre__veil {
   clip-path: circle(0px at 50% 50%);
 }
+/* fades in when the first frame is drawn */
 .pre__gl {
+  opacity: 0;
+  transition: opacity 0.9s ease-out;
   position: absolute;
   inset: 0;
   width: 100%;

@@ -171,11 +171,12 @@ void main(){
   vec2 px = gl_FragCoord.xy - 0.5 * u_res;
   float H = u_res.y;
   float prog = clamp(u_prog, 0.0, 1.0);
+  float pe = prog * prog * (3.0 - 2.0 * prog);       // eased once, so every change glides
   float fall = clamp(u_fall, 0.0, 1.0);
 
   // camera: far away, nearly in the disk's plane, drifting a little; the fall drops it in
-  gD = mix(46.0 - 6.0 * prog, 2.7, pow(fall, 1.7));
-  float incl = radians(84.0 - 3.0 * prog + 1.1 * sin(u_t * 0.21) - 6.0 * fall);
+  gD = mix(46.0 - 6.0 * pe, 2.7, pow(fall, 1.7));
+  float incl = radians(84.0 - 3.0 * pe + 1.1 * sin(u_t * 0.21) - 6.0 * fall);
   gP = gD * vec3(0.0, cos(incl), -sin(incl));
   gFwd = -normalize(gP);
   vec3 right = normalize(cross(gFwd, vec3(0.0, 1.0, 0.0)));
@@ -186,9 +187,9 @@ void main(){
   float aspect = u_res.x / H;
   gFs = 0.74 * max(1.0, 1.15 / aspect);
   gPx = gD * gFs / H;                              // size of one pixel at the impact-parameter plane
-  gInten = smoothstep(0.0, 0.25, prog) * (0.4 + 0.6 * prog) * (1.0 + 1.6 * u_flare);
+  gInten = (0.14 + 0.86 * pe) * (1.0 + 0.85 * u_flare);
   gRin = 3.2;
-  gRout = 6.5 + 8.0 * prog;
+  gRout = 6.5 + 8.0 * pe;
 
   // the shadow edge and the photon ring are razor thin: take four samples there, one elsewhere
   float b0;
@@ -206,7 +207,7 @@ void main(){
   // the thin, bright ring of light that grazes the horizon (kept at least a pixel wide)
   float w = max(0.085, 1.4 * gPx);
   float ring = exp(-pow((b0 - 5.196) / w, 2.0)) * (0.085 / w);
-  col += vec3(1.0, 0.82, 0.62) * ring * (0.1 + 0.32 * gInten + 1.4 * u_flare);
+  col += vec3(1.0, 0.82, 0.62) * ring * (0.1 + 0.32 * gInten + 0.9 * u_flare);
   col += vec3(1.0, 0.38, 0.12) * exp(-abs(b0 - 5.2) * 0.22) * 0.018 * gInten;
 
   // plunge: everything falls to black
@@ -312,6 +313,8 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
     let lastNow = 0;
     let ema = 0.016;
     let nFrames = 0;
+    let vel = 0; // current speed of the progress, in % per second
+    let shown = false;
     let flared = false;
     let fell = false;
     const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -322,19 +325,22 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
       lastNow = now;
       // governor: if the average frame is slower than ~28 fps, shrink the render and look again
       ema = ema * 0.9 + dt * 0.1;
-      if (linkedOk && ++nFrames % 30 === 0 && ema > 0.036 && quality > 0.25) {
+      if (linkedOk && pct < 55 && ++nFrames % 30 === 0 && ema > 0.036 && quality > 0.25) {
         quality *= 0.78;
         resize();
       }
       if (gl && par && !linkedOk && !failed && gl.getProgramParameter(prog!, par.COMPLETION_STATUS_KHR)) finishSetup();
 
       const t = (now - start) / 1000;
-      // creep toward ~88% while loading; once loaded (and shown for a moment) charge to 100.
-      // Eased by time, not by frame, so it looks the same at any refresh rate.
-      const ready = doneRef.current && (t > 1.8 || skipRef.current);
-      const target = ready ? 100 : Math.min(88, 8 + t * 34);
-      pct += (target - pct) * (1 - Math.exp(-dt * (ready ? 6.5 : 3.6)));
-      if (ready && pct > 99.4) pct = 100;
+      // Progress is a smooth, continuous motion: it drifts toward ~88% while loading, then once
+      // everything is ready it swells to 100%. Its speed eases up and down (never jumps), and it
+      // is stepped by real time, so it looks the same at any refresh rate.
+      const ready = doneRef.current && (t > 2.0 || skipRef.current);
+      const target = ready ? 100 : Math.min(88, 6 + t * 28);
+      const want = Math.min(ready ? 62 : 38, Math.max(0, target - pct) * (ready ? 3.2 : 2.2));
+      vel += (want - vel) * (1 - Math.exp(-dt * 4.5));
+      pct = Math.min(target, pct + vel * dt);
+      if (ready && pct > 99.3) pct = 100;
       if (reduced) pct = ready ? 100 : Math.min(88, pct);
 
       if (pct >= 100 && flareStart < 0) flareStart = now;
@@ -348,6 +354,10 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
         gl.uniform1f(uni.u_fall, fall);
         gl.uniform1f(uni.u_flare, flare);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
+        if (!shown) {
+          shown = true;
+          cv.style.opacity = '1'; // fade in rather than cut in
+        }
       }
 
       // sound (only if the visitor switched it on): a drone that swells with the load, a chime at
