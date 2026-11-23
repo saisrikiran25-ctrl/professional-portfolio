@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Terminal, X } from 'lucide-react';
+import { Check, Terminal, Volume2, VolumeX, X } from 'lucide-react';
 import { sound } from '../lib/audio';
 import { Arrow } from './Bits';
 import { useMedia, useSound } from '../lib/hooks';
@@ -135,6 +135,7 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
   const doneRef = useRef(done);
   doneRef.current = done;
   const skipRef = useRef(false);
+  const soundOn = useSound();
   const NAME = 'SAI SRIKIRAN J';
 
   useEffect(() => {
@@ -192,6 +193,8 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
     let flareStart = -1;
     let leavingSet = false;
     let lastLabel = '';
+    let flared = false;
+    let fell = false;
     const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
     const frame = (now: number) => {
@@ -216,6 +219,22 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
         gl.uniform1f(uni.u_flare, flare);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
+      // sound (only if the visitor switched it on): a drone that swells with the load, a chime at
+      // the flare, and a rush and boom as the camera falls in
+      if (sound.on) {
+        if (fall <= 0) {
+          sound.holeStart();
+          sound.holeProgress(pct / 100);
+        }
+        if (flareStart >= 0 && !flared) {
+          flared = true;
+          sound.holeFlare();
+        }
+        if (fall > 0 && !fell) {
+          fell = true;
+          sound.holeFall();
+        }
+      }
       root.style.setProperty('--f', fall.toFixed(4));
       root.style.setProperty('--p', (pct / 100).toFixed(4));
 
@@ -238,6 +257,7 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
+      sound.holeStop(0.3);
     };
   }, []);
 
@@ -275,6 +295,10 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
           WAKING UP
         </p>
       </div>
+      <button type="button" className="pre__sound" onClick={() => sound.toggle()} aria-pressed={soundOn}>
+        {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
+        <span>{soundOn ? 'Sound on' : 'Sound off · tap to enable'}</span>
+      </button>
       <button
         type="button"
         className="pre__skip"

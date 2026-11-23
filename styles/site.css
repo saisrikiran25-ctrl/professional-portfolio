@@ -466,6 +466,7 @@ button {
 .pre.is-leaving .pre__name,
 .pre.is-leaving .pre__meter,
 .pre.is-leaving .pre__skip,
+.pre.is-leaving .pre__sound,
 .pre.is-leaving .pre__bar {
   opacity: 0;
 }
@@ -543,6 +544,27 @@ button {
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--muted);
+}
+.pre__sound {
+  position: absolute;
+  left: clamp(18px, 3vw, 40px);
+  bottom: clamp(30px, 7vh, 64px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 6px;
+  font: 700 10px var(--f-body);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: opacity 0.4s, color 0.2s;
+}
+.pre__sound:hover,
+.pre__sound[aria-pressed='true'] {
+  color: var(--fg);
+}
+.pre__sound[aria-pressed='true'] svg {
+  color: var(--accent);
 }
 .pre__skip {
   position: absolute;

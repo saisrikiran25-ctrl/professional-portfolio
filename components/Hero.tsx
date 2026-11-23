@@ -376,7 +376,7 @@ const Hero: React.FC = () => {
       if (L.hovered >= 0) want = dialColors[L.hovered];
       else {
         const cyc = time / 3.4;
-        const ia = Math.floor(cyc) % dialColors.length;
+        const ia = ((Math.floor(cyc) % dialColors.length) + dialColors.length) % dialColors.length; // safe for a tiny negative first frame
         const ib = (ia + 1) % dialColors.length;
         const f = cyc - Math.floor(cyc);
         const sf = f * f * (3 - 2 * f);
