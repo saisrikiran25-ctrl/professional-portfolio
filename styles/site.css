@@ -428,6 +428,9 @@ button {
   clip-path: circle(0px at 50% 50%);
 }
 /* fades in when the first frame is drawn */
+.pre--matrix .pre__veil {
+  background: #010503;
+}
 .pre__gl {
   opacity: 0;
   transition: opacity 0.9s ease-out;

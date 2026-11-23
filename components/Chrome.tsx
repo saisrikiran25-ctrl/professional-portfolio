@@ -4,6 +4,7 @@ import { sound } from '../lib/audio';
 import { Arrow } from './Bits';
 import { useMedia, useSound } from '../lib/hooks';
 import { prefersReducedMotion, startScroll, stopScroll } from '../lib/scroll';
+import { MatrixPreloader } from './MatrixPreloader';
 
 /* ------------------------------------------------------------------ */
 /* Preloader — a black hole                                            */
@@ -227,7 +228,7 @@ void main(){
  * A small readout and a skip control sit at the edges. With reduced motion there is no fall:
  * a still hole and a quick iris. Without WebGL a CSS hole stands in.
  */
-export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
+const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
   const [leaving, setLeaving] = useState(false);
   const [gone, setGone] = useState(false);
   const [noGL, setNoGL] = useState(false);
@@ -454,6 +455,23 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
       </div>
     </div>
   );
+};
+
+/**
+ * Two intros, one chosen at random on each visit: the ray-traced black hole or the digital rain.
+ * `?intro=hole` or `?intro=matrix` in the address forces one, which is handy for testing.
+ */
+export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
+  const [variant] = useState<'hole' | 'matrix'>(() => {
+    try {
+      const q = new URLSearchParams(window.location.search).get('intro');
+      if (q === 'hole' || q === 'matrix') return q;
+    } catch {
+      /* fall through to a random pick */
+    }
+    return Math.random() < 0.5 ? 'matrix' : 'hole';
+  });
+  return variant === 'matrix' ? <MatrixPreloader done={done} /> : <BlackHolePreloader done={done} />;
 };
 
 /* ------------------------------------------------------------------ */

@@ -29,6 +29,7 @@ class SoundEngine {
   private padFilter!: BiquadFilterNode;
   private noise!: AudioBuffer;
   private noiseLong!: AudioBuffer;
+  private mx: { lfo?: OscillatorNode; o1: OscillatorNode; o2: OscillatorNode; lp: BiquadFilterNode; g: GainNode; src: AudioBufferSourceNode; hg: GainNode } | null = null;
   private hole: { lfo: OscillatorNode; o1: OscillatorNode; o2: OscillatorNode; lp: BiquadFilterNode; g: GainNode; bp: BiquadFilterNode; ng: GainNode; src: AudioBufferSourceNode } | null = null;
   private listeners = new Set<Listener>();
   private _on = false;
@@ -483,6 +484,115 @@ class SoundEngine {
     o.stop(now + 2.2);
     // the drone falls away
     this.holeStop(1.1);
+    this.matrixStop(1.1);
+  }
+
+  /** Digital rain intro: a low data hum and a faint hiss that swell with the load. */
+  matrixStart() {
+    if (!this.ctx || !this._on || this.mx) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 260;
+    lp.Q.value = 0.9;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.03, now + 1.0);
+    const o1 = ctx.createOscillator();
+    o1.type = 'sine';
+    o1.frequency.value = 55;
+    const o2 = ctx.createOscillator();
+    o2.type = 'square';
+    o2.frequency.value = 110;
+    o2.detune.value = 6;
+    const o2g = ctx.createGain();
+    o2g.gain.value = 0.12;
+    o1.connect(lp);
+    o2.connect(o2g).connect(lp);
+    lp.connect(g);
+    g.connect(this.master);
+    g.connect(this.send);
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseLong;
+    src.loop = true;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 3800;
+    const hg = ctx.createGain();
+    hg.gain.value = 0.0001;
+    src.connect(hp).connect(hg);
+    hg.connect(this.master);
+    o1.start(now);
+    o2.start(now);
+    src.start(now);
+    this.mx = { o1, o2, lp, g, src, hg };
+  }
+
+  matrixProgress(p: number) {
+    if (!this.ctx || !this._on || !this.mx) return;
+    const t = this.ctx.currentTime;
+    const m = this.mx;
+    m.o1.frequency.setTargetAtTime(55 + 28 * p, t, 0.2);
+    m.o2.frequency.setTargetAtTime(110 + 56 * p, t, 0.2);
+    m.lp.frequency.setTargetAtTime(260 + 950 * p, t, 0.2);
+    m.g.gain.setTargetAtTime(0.03 + 0.08 * p, t, 0.25);
+    m.hg.gain.setTargetAtTime(0.002 + 0.02 * p, t, 0.25);
+  }
+
+  /** A tiny digital chirp, like a line of code printing. */
+  matrixPip() {
+    if (!this.ctx || !this._on) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const o = ctx.createOscillator();
+    o.type = Math.random() < 0.5 ? 'sine' : 'triangle';
+    o.frequency.value = 1400 + Math.random() * 2800;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.016, now + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+    o.connect(g).connect(this.master);
+    g.connect(this.send);
+    o.start(now);
+    o.stop(now + 0.06);
+  }
+
+  /** The name locks on: a low stab and two bright bells. */
+  matrixLock() {
+    if (!this.ctx || !this._on) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    for (const [f, v] of [[110, 0.2], [220, 0.12], [330, 0.07]] as [number, number][]) {
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(v, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+      o.connect(g).connect(this.master);
+      g.connect(this.send);
+      o.start(now);
+      o.stop(now + 1.4);
+    }
+    this.bell(7, 0.5, -0.15, 1.6);
+    setTimeout(() => this.bell(11, 0.45, 0.2, 2.0), 140);
+  }
+
+  matrixStop(fade = 0.5) {
+    const m = this.mx;
+    if (!this.ctx || !m) return;
+    this.mx = null;
+    const t = this.ctx.currentTime;
+    m.g.gain.cancelScheduledValues(t);
+    m.g.gain.setTargetAtTime(0.0001, t, fade / 3);
+    m.hg.gain.cancelScheduledValues(t);
+    m.hg.gain.setTargetAtTime(0.0001, t, fade / 3);
+    const end = t + fade + 0.4;
+    m.o1.stop(end);
+    m.o2.stop(end);
+    m.src.stop(end);
   }
 
   /** Fade the black hole drone out and release it. */
