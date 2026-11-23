@@ -8,8 +8,8 @@ import { Item, KIND_LABEL, rgb } from './items';
 export const CARD_W = 448;
 export const CARD_H = 252; // 16:9, the shape of the poster artwork
 
-export const FONT_DISPLAY = '"Unbounded Variable", "Hanken Grotesk Variable", system-ui, sans-serif';
-export const FONT_BODY = '"Hanken Grotesk Variable", system-ui, sans-serif';
+export const FONT_DISPLAY = '"JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
+export const FONT_BODY = '"JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
 export const FONT_MONO = FONT_BODY;
 
 type Ctx = CanvasRenderingContext2D;
@@ -188,7 +188,7 @@ export function drawCardArt(
 
   // title — as large as the box allows, shrinking only if it would run into the kicker
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = '#f2f2ef';
+  ctx.fillStyle = '#d4ffe0';
   let size = Math.round(Math.max(28, Math.min(54, h * 0.14)));
   let lines: string[] = [];
   const maxW = w - 64;
@@ -210,9 +210,9 @@ export function drawCardArt(
   setSpacing(ctx, 1.2);
   ctx.beginPath();
   ctx.arc(28, statusY, 3.4, 0, Math.PI * 2);
-  ctx.fillStyle = '#34d399';
+  ctx.fillStyle = '#7dffb0';
   ctx.fill();
-  ctx.fillStyle = 'rgba(242,242,239,0.82)';
+  ctx.fillStyle = 'rgba(212, 255, 224,0.82)';
   const statusText = item.status.toUpperCase();
   ctx.fillText(statusText, 40, statusY + 0.5);
   const statusW = ctx.measureText(statusText).width;
@@ -220,7 +220,7 @@ export function drawCardArt(
 
   // tags — quiet text, no pills (beside the status when compact, below it otherwise)
   ctx.font = `500 ${small}px ${FONT_BODY}`;
-  ctx.fillStyle = 'rgba(242,242,239,0.6)';
+  ctx.fillStyle = 'rgba(212, 255, 224,0.6)';
   const shown = item.tags.slice(0, 3);
   const tagX = compact ? 40 + statusW + 22 : 24;
   const room = w - tagX - 24;

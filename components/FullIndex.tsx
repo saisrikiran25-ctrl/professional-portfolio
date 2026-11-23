@@ -107,15 +107,15 @@ const FullIndex: React.FC<Props> = ({ open, onClose }) => {
       let d = Math.abs(Math.atan2(Math.sin(a - hot), Math.cos(a - hot)));
       const lit = hot !== -999 && hover ? Math.exp(-(d * d) / 0.012) : 0;
       const len = (major ? 9 : 5) + lit * 16;
-      ctx.strokeStyle = lit > 0.3 ? `rgba(255,84,0,${0.5 + lit * 0.5})` : major ? 'rgba(242,242,239,0.4)' : 'rgba(242,242,239,0.18)';
+      ctx.strokeStyle = lit > 0.3 ? `rgba(0,255,102,${0.5 + lit * 0.5})` : major ? 'rgba(212, 255, 224,0.4)' : 'rgba(212, 255, 224,0.18)';
       ctx.lineWidth = major ? 1.4 : 1;
       ctx.beginPath();
       ctx.moveTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
       ctx.lineTo(cx + Math.cos(a) * (R + len), cy + Math.sin(a) * (R + len));
       ctx.stroke();
     }
-    ctx.fillStyle = '#FF5400';
-    ctx.shadowColor = 'rgba(255,84,0,.9)';
+    ctx.fillStyle = '#00ff66';
+    ctx.shadowColor = 'rgba(0,255,102,.9)';
     ctx.shadowBlur = 12;
     ctx.beginPath();
     ctx.arc(cx, cy, 4, 0, Math.PI * 2);

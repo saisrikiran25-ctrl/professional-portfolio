@@ -4,6 +4,7 @@ import '@fontsource-variable/unbounded';
 import '@fontsource-variable/hanken-grotesk';
 import '@fontsource-variable/jetbrains-mono';
 import './styles/site.css';
+import './styles/matrix.css';
 import App from './App';
 
 const rootElement = document.getElementById('root');

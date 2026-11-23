@@ -218,7 +218,7 @@ export class Mosaic {
       ctx.stroke(p);
     });
     if (hasPointer) {
-      ctx.strokeStyle = '#fb5e28';
+      ctx.strokeStyle = '#00ff66';
       ctx.stroke(hot);
     }
   }
@@ -348,11 +348,11 @@ export class WordMark {
       else if (near > 0.12 || this.rnd[i] > 0.55) dot(lit, cx, cy, s * 0.7);
       else dot(dim, cx, cy, s * 0.7);
     }
-    ctx.fillStyle = 'rgba(242,242,239,0.2)';
+    ctx.fillStyle = 'rgba(212, 255, 224,0.2)';
     ctx.fill(dim);
-    ctx.fillStyle = 'rgba(242,242,239,0.82)';
+    ctx.fillStyle = 'rgba(212, 255, 224,0.82)';
     ctx.fill(lit);
-    ctx.fillStyle = '#fb5e28';
+    ctx.fillStyle = '#00ff66';
     ctx.fill(hot);
   }
 

@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import FullIndex from './components/FullIndex';
 import Viewer from './components/Viewer';
 import { Cursor, Dock, Header, Preloader, Toast } from './components/Chrome';
+import RainBackdrop from './components/RainBackdrop';
 import Warp from './components/Warp';
 import { warpTo } from './lib/warp';
 import { Assets, loadAssets } from './lib/assets';
@@ -106,7 +107,7 @@ const Experience: React.FC = () => {
         const cy = e.clientY || window.innerHeight / 2;
         warpTo({
           label: LABELS[href] ?? a.textContent?.trim() ?? 'Section',
-          color: [251, 94, 40],
+          color: [0, 255, 102],
           x: cx,
           y: cy,
           go: jump,
@@ -139,6 +140,7 @@ const Experience: React.FC = () => {
 
   return (
     <UIContext.Provider value={ui}>
+      <RainBackdrop />
       <Preloader done={ready} />
       <Warp />
       <Cursor />
