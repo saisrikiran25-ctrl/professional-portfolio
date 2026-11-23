@@ -6,128 +6,220 @@ import { useMedia, useSound } from '../lib/hooks';
 import { prefersReducedMotion, startScroll, stopScroll } from '../lib/scroll';
 
 /* ------------------------------------------------------------------ */
-/* Preloader                                                           */
+/* Preloader — a black hole                                            */
 /* ------------------------------------------------------------------ */
 
-const PRE_TICKS = 120;
 const PRE_LABELS: [number, string][] = [
   [0, 'WAKING UP'],
   [28, 'LOADING SIGNALS'],
   [58, 'CALIBRATING'],
-  [86, 'TUNING IN'],
-  [100, 'READY'],
+  [86, 'APPROACHING THE HORIZON'],
+  [100, 'ENTERING'],
 ];
 
+const BH_VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+
 /**
- * The intro "charge-up". A ring of ticks fills clockwise to 100% with a live counter, a bolt
- * and changing status words. Progress follows the real asset loading (it creeps toward ~88%
- * while loading, then completes) but never finishes too quickly to be seen. At 100% it flashes
- * and an iris closes toward the centre, revealing the dial.
+ * A black hole drawn analytically in one fragment shader: a lensed starfield (light bends around
+ * the horizon), a tilted accretion disk with Doppler-brightened streaks, a lensed arc of the far
+ * side of the disk, and a photon ring. u_prog (0..1) spins the disk up as the site loads, u_flare
+ * flashes the ring at 100%, and u_fall (0..1) drops the camera into the singularity.
+ */
+const BH_FS = `
+precision highp float;
+uniform vec2 u_res;
+uniform float u_t;
+uniform float u_prog;
+uniform float u_fall;
+uniform float u_flare;
+
+float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float noise(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float fbm(vec2 p){
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++){ v += a * noise(p); p = p * 2.03 + vec2(11.7, 3.1); a *= 0.5; }
+  return v;
+}
+vec3 stars(vec2 p){
+  vec3 col = vec3(0.0);
+  for (int l = 0; l < 3; l++){
+    float fl = float(l);
+    vec2 g = p * (16.0 + fl * 24.0) + vec2(fl * 17.3, fl * 5.1);
+    vec2 id = floor(g), f = fract(g) - 0.5;
+    float h = hash(id + fl * 7.1);
+    float on = step(0.935, h);
+    vec2 off = vec2(hash(id + 3.3), hash(id + 8.8)) - 0.5;
+    float d = length(f - off * 0.6);
+    float tw = 0.65 + 0.35 * sin(u_t * (1.5 + h * 3.0) + h * 40.0);
+    float s = on * smoothstep(0.085 / (1.0 + fl * 0.45), 0.0, d) * tw;
+    vec3 tint = mix(vec3(0.7, 0.8, 1.0), vec3(1.0, 0.8, 0.6), hash(id + 1.7));
+    col += s * tint * (0.45 + h);
+  }
+  return col;
+}
+void main(){
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+  float fall = clamp(u_fall, 0.0, 1.0);
+  float zoom = mix(1.0, 0.03, pow(fall, 2.3));
+  vec2 p = uv * zoom;
+  float rs = 0.105;
+  float r = length(p);
+
+  // the starfield, bent around the hole
+  vec2 pl = p * (1.0 - 2.4 * rs * rs / (r * r + 0.0008));
+  float ca = cos(u_t * 0.03), sa = sin(u_t * 0.03);
+  pl = mat2(ca, -sa, sa, ca) * pl;
+  vec3 col = stars(pl);
+  col += vec3(0.03, 0.014, 0.02) * fbm(pl * 3.0 + u_t * 0.02) * 0.9;
+
+  float prog = clamp(u_prog, 0.0, 1.0);
+  float inten = smoothstep(0.0, 0.2, prog) * (0.28 + 0.72 * prog);
+  float inHole = 1.0 - smoothstep(rs * 0.97, rs, r);
+  col *= 1.0 - inHole;
+
+  // accretion disk, tilted nearly edge-on
+  vec2 q = vec2(p.x, p.y / 0.27);
+  float rd = length(q);
+  float rin = rs * 1.55;
+  float rout = rs * (2.3 + 3.8 * prog);
+  float band = smoothstep(rin, rin + 0.012, rd) * (1.0 - smoothstep(rout * 0.55, rout, rd));
+  float ang = atan(q.y, q.x);
+  float spin = u_t * (0.5 + 2.4 * prog) * (0.6 / (rd + 0.05));
+  float streak = 0.3 + 0.95 * fbm(vec2(ang * 5.0 + spin * 6.0 + rd * 18.0, rd * 17.0));
+  float temp = clamp((rout - rd) / (rout - rin), 0.0, 1.0);
+  vec3 hot = mix(vec3(1.0, 0.33, 0.1), vec3(1.0, 0.93, 0.82), pow(temp, 1.7));
+  float doppler = 0.55 + 0.85 * smoothstep(-0.6, 0.6, -p.x / max(rout, 0.001));
+  vec3 disk = hot * streak * band * doppler * inten * (1.7 * pow(temp, 1.2) + 0.22);
+  float front = smoothstep(0.0, -0.012, p.y);
+  col += disk * mix(1.0 - inHole, 1.0, front);
+
+  // the far side of the disk, bent over and under the hole
+  float arcW = exp(-pow((r - rs * 1.3) / (rs * 0.24), 2.0));
+  float arcDir = 0.35 + 0.65 * smoothstep(0.0, 0.9, abs(p.y) / max(r, 0.001));
+  float arcStreak = 0.4 + 0.9 * fbm(vec2(atan(p.y, p.x) * 4.0 - u_t * (0.4 + 1.6 * prog), r * 30.0));
+  col += mix(vec3(1.0, 0.4, 0.14), vec3(1.0, 0.9, 0.8), 0.45) * arcW * arcDir * arcStreak * inten * 1.25;
+
+  // photon ring, a glow, and the flare as the hole opens
+  float ring = exp(-pow((r - rs * 1.02) / (rs * 0.035), 2.0));
+  col += vec3(1.0, 0.86, 0.72) * ring * (0.5 + 3.2 * u_flare) * (0.35 + 0.65 * inten);
+  col += vec3(1.0, 0.36, 0.12) * exp(-r * 3.4) * 0.16 * inten;
+  col += vec3(1.0, 0.9, 0.78) * u_flare * exp(-pow((r - rs * 1.2) / (rs * 0.6), 2.0)) * 0.9;
+
+  // plunge: everything falls to black
+  col *= 1.0 - smoothstep(0.78, 1.0, fall);
+  col = 1.0 - exp(-col * 1.15);
+  col *= 1.0 - 0.45 * smoothstep(0.35, 1.1, length(uv));
+  gl_FragColor = vec4(pow(col, vec3(0.92)), 1.0);
+}
+`;
+
+/**
+ * The intro. A black hole spins up as the site loads (its accretion disk brightens and speeds
+ * up with the real asset loading, creeping toward ~88% and finishing when everything is ready),
+ * the ring flares, and the camera falls in; the name is stretched toward the hole on the way.
+ * A small readout and a skip control sit at the edges. With reduced motion there is no fall:
+ * a still hole and a quick iris. Without WebGL a CSS hole stands in.
  */
 export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
   const [leaving, setLeaving] = useState(false);
   const [gone, setGone] = useState(false);
-  const ringRef = useRef<HTMLCanvasElement>(null);
+  const [noGL, setNoGL] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const glRef = useRef<HTMLCanvasElement>(null);
   const numRef = useRef<HTMLSpanElement>(null);
   const labelRef = useRef<HTMLParagraphElement>(null);
   const barRef = useRef<HTMLElement>(null);
   const doneRef = useRef(done);
   doneRef.current = done;
+  const skipRef = useRef(false);
+  const NAME = 'SAI SRIKIRAN J';
 
   useEffect(() => {
-    const cv = ringRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext('2d')!;
+    const cv = glRef.current;
+    const root = rootRef.current;
+    if (!cv || !root) return;
     const reduced = prefersReducedMotion();
+    const gl = cv.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' }) as WebGLRenderingContext | null;
+
+    let prog: WebGLProgram | null = null;
+    let uni: Record<string, WebGLUniformLocation | null> = {};
+    if (gl) {
+      const sh = (type: number, src: string) => {
+        const s = gl.createShader(type)!;
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+      };
+      const vs = sh(gl.VERTEX_SHADER, BH_VS);
+      const fs = sh(gl.FRAGMENT_SHADER, BH_FS);
+      if (vs && fs) {
+        prog = gl.createProgram()!;
+        gl.attachShader(prog, vs);
+        gl.attachShader(prog, fs);
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) prog = null;
+      }
+      if (prog) {
+        gl.useProgram(prog);
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+        const loc = gl.getAttribLocation(prog, 'a');
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        for (const n of ['u_res', 'u_t', 'u_prog', 'u_fall', 'u_flare']) uni[n] = gl.getUniformLocation(prog, n);
+      }
+    }
+    if (!gl || !prog) setNoGL(true);
+
+    const resize = () => {
+      // keep the pixel count sane on very large or dense screens
+      const px = window.innerWidth * window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, px > 2_000_000 ? 1 : 1.5);
+      cv.width = Math.max(2, Math.round(cv.clientWidth * dpr));
+      cv.height = Math.max(2, Math.round(cv.clientHeight * dpr));
+      if (gl) gl.viewport(0, 0, cv.width, cv.height);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
     const start = performance.now();
     let pct = 0;
     let raf = 0;
-    let finished = false;
+    let flareStart = -1;
+    let leavingSet = false;
     let lastLabel = '';
-    let timer = 0;
-
-    const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      const w = cv.clientWidth || 400;
-      cv.width = Math.round(w * dpr);
-      cv.height = Math.round(w * dpr);
-      return { w, dpr };
-    };
-    let { w, dpr } = size();
-    const onResize = () => ({ w, dpr } = size());
-    window.addEventListener('resize', onResize);
-
-    const draw = (t: number) => {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, w);
-      const c = w / 2;
-      const R = w * 0.37;
-      const TAU = Math.PI * 2;
-      const lead = (pct / 100) * PRE_TICKS;
-
-      // glow riding the leading edge
-      if (!finished || pct < 100) {
-        const la = (lead / PRE_TICKS) * TAU - Math.PI / 2;
-        const g = ctx.createRadialGradient(c + Math.cos(la) * R, c + Math.sin(la) * R, 0, c + Math.cos(la) * R, c + Math.sin(la) * R, w * 0.18);
-        g.addColorStop(0, 'rgba(251,94,40,0.32)');
-        g.addColorStop(1, 'rgba(251,94,40,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, w);
-      }
-
-      // inner hairline ring
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(c, c, R * 0.84, 0, TAU);
-      ctx.stroke();
-
-      ctx.lineCap = 'round';
-      for (let j = 0; j < PRE_TICKS; j++) {
-        const a = (j / PRE_TICKS) * TAU - Math.PI / 2;
-        const major = j % 10 === 0;
-        const lit = j < lead;
-        const dist = lead - j; // how far behind the leading edge
-        let len = major ? 16 : 9;
-        let alpha = major ? 0.34 : 0.16;
-        let rgb = '255,255,255';
-        if (lit) {
-          const shimmer = Math.sin(t * 7 - j * 0.35) * 0.5 + 0.5;
-          len += 3 + shimmer * 2.5 + Math.max(0, 6 - dist) * 1.2;
-          alpha = 0.55 + 0.45 * Math.min(1, 1 - dist / PRE_TICKS * 0.4);
-          const k = Math.min(1, dist / 14);
-          // the freshest ticks are white-hot, settling to orange behind the edge
-          rgb = `255,${Math.round(255 - k * 161)},${Math.round(255 - k * 215)}`;
-        }
-        if (pct >= 100) {
-          rgb = '255,255,255';
-          alpha = 1;
-          len += 4;
-        }
-        const ca = Math.cos(a);
-        const sa = Math.sin(a);
-        ctx.strokeStyle = `rgba(${rgb},${alpha})`;
-        ctx.lineWidth = major ? 2 : 1.4;
-        ctx.beginPath();
-        ctx.moveTo(c + ca * R, c + sa * R);
-        ctx.lineTo(c + ca * (R + len), c + sa * (R + len));
-        ctx.stroke();
-      }
-    };
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       const t = (now - start) / 1000;
       // creep toward ~88% while loading; once loaded (and shown for a moment) charge to 100
-      const ready = doneRef.current && t > 1.9;
-      const target = ready ? 100 : Math.min(88, 10 + t * 38);
-      pct += (target - pct) * (ready ? 0.085 : 0.07);
-      if (ready && pct > 99.3) pct = 100;
+      const ready = doneRef.current && (t > 1.8 || skipRef.current);
+      const target = ready ? 100 : Math.min(88, 8 + t * 34);
+      pct += (target - pct) * (ready ? 0.1 : 0.06);
+      if (ready && pct > 99.4) pct = 100;
       if (reduced) pct = ready ? 100 : Math.min(88, pct);
 
-      draw(t);
-      const shown = Math.floor(pct);
-      if (numRef.current) numRef.current.textContent = String(shown);
+      if (pct >= 100 && flareStart < 0) flareStart = now;
+      const flare = flareStart < 0 ? 0 : Math.sin(Math.PI * clamp01((now - flareStart) / 900));
+      const fall = !reduced && flareStart >= 0 ? clamp01((now - flareStart - 450) / 1250) : 0;
+
+      if (gl && prog) {
+        gl.uniform2f(uni.u_res, cv.width, cv.height);
+        gl.uniform1f(uni.u_t, reduced ? 2.0 : t);
+        gl.uniform1f(uni.u_prog, pct / 100);
+        gl.uniform1f(uni.u_fall, fall);
+        gl.uniform1f(uni.u_flare, flare);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+      root.style.setProperty('--f', fall.toFixed(4));
+      root.style.setProperty('--p', (pct / 100).toFixed(4));
+
+      if (numRef.current) numRef.current.textContent = String(Math.floor(pct));
       if (barRef.current) barRef.current.style.transform = `scaleX(${pct / 100})`;
       if (labelRef.current) {
         let l = PRE_LABELS[0][1];
@@ -137,18 +229,15 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
           labelRef.current.textContent = l;
         }
       }
-      if (pct >= 100 && !finished) {
-        finished = true;
-        cancelAnimationFrame(raf);
-        draw(t);
-        timer = window.setTimeout(() => setLeaving(true), 420);
+      if (!leavingSet && flareStart >= 0 && (fall >= 0.92 || (reduced && now - flareStart > 500))) {
+        leavingSet = true;
+        setLeaving(true);
       }
     };
     raf = requestAnimationFrame(frame);
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(timer);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', resize);
     };
   }, []);
 
@@ -159,28 +248,42 @@ export const Preloader: React.FC<{ done: boolean }> = ({ done }) => {
   }, [leaving]);
 
   if (gone) return null;
+  const letters = NAME.split('');
   return (
-    <div className={`pre ${leaving ? 'is-leaving' : ''}`} role="status" aria-label="Loading">
-      <div className="pre__veil" />
+    <div ref={rootRef} className={`pre ${leaving ? 'is-leaving' : ''} ${noGL ? 'pre--nogl' : ''}`} role="status" aria-label="Loading">
+      <div className="pre__veil">
+        <canvas ref={glRef} className="pre__gl" aria-hidden="true" />
+        {noGL && <div className="pre__hole" aria-hidden="true" />}
+      </div>
       <div className="pre__hud pre__hud--l">
         <b>SAI SRIKIRAN J</b>
       </div>
       <div className="pre__hud pre__hud--r">EST. 2026</div>
-      <div className="pre__core">
-        <canvas ref={ringRef} className="pre__ring" aria-hidden="true" />
-        <div className="pre__center">
-          <svg className="pre__bolt" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-            <path d="M13.5 2 5 13.5h6L10 22l9-12h-6.2L13.5 2Z" fill="currentColor" />
-          </svg>
-          <div className="pre__num">
-            <span ref={numRef}>0</span>
-            <small>%</small>
-          </div>
-          <p className="pre__label" ref={labelRef}>
-            WAKING UP
-          </p>
+      <p className="pre__name" aria-hidden="true">
+        {letters.map((c, i) => (
+          <span key={i} style={{ ['--o' as string]: i - (letters.length - 1) / 2 }}>
+            {c === ' ' ? ' ' : c}
+          </span>
+        ))}
+      </p>
+      <div className="pre__meter">
+        <div className="pre__num">
+          <span ref={numRef}>0</span>
+          <small>%</small>
         </div>
+        <p className="pre__label" ref={labelRef}>
+          WAKING UP
+        </p>
       </div>
+      <button
+        type="button"
+        className="pre__skip"
+        onClick={() => {
+          skipRef.current = true;
+        }}
+      >
+        Skip
+      </button>
       <div className="pre__bar">
         <i ref={barRef} />
       </div>

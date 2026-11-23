@@ -315,7 +315,7 @@ const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
     if (!el) return;
     const items = Array.from(el.children) as HTMLElement[];
     let raf = 0;
-    const update = () => {
+    const update = (sync = true) => {
       raf = 0;
       const r = el.getBoundingClientRect();
       const line = window.innerHeight * 0.6;
@@ -333,15 +333,16 @@ const Timeline: React.FC<{ entries: Entry[] }> = ({ entries }) => {
       const span = 300;
       const k = next === undefined ? 0 : clamp((line - 60 + span - next) / span);
       const e = k * k * (3 - 2 * k);
-      flushSync(() => setCur((c) => (c === active ? c : active)));
+      if (sync) flushSync(() => setCur((c) => (c === active ? c : active)));
+      else setCur((c) => (c === active ? c : active));
       yearRef.current?.style.setProperty('--e', e.toFixed(4));
     };
     const on = () => {
-      if (!raf) raf = requestAnimationFrame(update);
+      if (!raf) raf = requestAnimationFrame(() => update(true));
     };
     window.addEventListener('scroll', on, { passive: true });
     window.addEventListener('resize', on);
-    update();
+    update(false);
     return () => {
       window.removeEventListener('scroll', on);
       window.removeEventListener('resize', on);
