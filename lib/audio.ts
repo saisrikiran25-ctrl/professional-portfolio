@@ -30,6 +30,7 @@ class SoundEngine {
   private noise!: AudioBuffer;
   private noiseLong!: AudioBuffer;
   private mx: { lfo?: OscillatorNode; o1: OscillatorNode; o2: OscillatorNode; lp: BiquadFilterNode; g: GainNode; src: AudioBufferSourceNode; hg: GainNode } | null = null;
+  private hole: { lfo: OscillatorNode; o1: OscillatorNode; o2: OscillatorNode; lp: BiquadFilterNode; g: GainNode; bp: BiquadFilterNode; ng: GainNode; src: AudioBufferSourceNode } | null = null;
   private listeners = new Set<Listener>();
   private _on = false;
   private lastBlip = 0;
@@ -103,7 +104,7 @@ class SoundEngine {
     const nd = this.noise.getChannelData(0);
     for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
 
-    // a longer noise bed for the intro's wind
+    // a longer noise bed for the black hole's wind
     this.noiseLong = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 3), ctx.sampleRate);
     const nl = this.noiseLong.getChannelData(0);
     let brown = 0;
@@ -372,8 +373,81 @@ class SoundEngine {
     }
   }
 
+  /** Black hole intro: a low drone and a bed of wind that swell with the loading progress. */
+  holeStart() {
+    if (!this.ctx || !this._on || this.hole) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 90;
+    lp.Q.value = 0.7;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.04, now + 1.2);
+    const o1 = ctx.createOscillator();
+    o1.type = 'sine';
+    o1.frequency.value = 38;
+    const o2 = ctx.createOscillator();
+    o2.type = 'sawtooth';
+    o2.frequency.value = 57;
+    o2.detune.value = -9;
+    const o2g = ctx.createGain();
+    o2g.gain.value = 0.22;
+    o1.connect(lp);
+    o2.connect(o2g).connect(lp);
+    lp.connect(g);
+    g.connect(this.master);
+    g.connect(this.send);
+    // slow throb, like a distant pulse
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.35;
+    const ld = ctx.createGain();
+    ld.gain.value = 25;
+    lfo.connect(ld).connect(lp.frequency);
+    // wind
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseLong;
+    src.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 180;
+    bp.Q.value = 0.8;
+    const ng = ctx.createGain();
+    ng.gain.value = 0.0001;
+    src.connect(bp).connect(ng);
+    ng.connect(this.master);
+    ng.connect(this.send);
+    o1.start(now);
+    o2.start(now);
+    lfo.start(now);
+    src.start(now);
+    this.hole = { lfo, o1, o2, lp, g, bp, ng, src };
+  }
+
+  /** 0..1 loading progress: the drone climbs and brightens, the wind rises. */
+  holeProgress(p: number) {
+    if (!this.ctx || !this._on || !this.hole) return;
+    const t = this.ctx.currentTime;
+    const h = this.hole;
+    h.o1.frequency.setTargetAtTime(38 + 16 * p, t, 0.2);
+    h.o2.frequency.setTargetAtTime(57 + 24 * p, t, 0.2);
+    h.lp.frequency.setTargetAtTime(90 + 420 * p, t, 0.2);
+    h.g.gain.setTargetAtTime(0.04 + 0.1 * p, t, 0.25);
+    h.bp.frequency.setTargetAtTime(180 + 900 * p, t, 0.25);
+    h.ng.gain.setTargetAtTime(0.004 + 0.045 * p * p, t, 0.25);
+  }
+
+  /** The ring flares at 100%: three rising glassy bells. */
+  holeFlare() {
+    if (!this.ctx || !this._on) return;
+    this.bell(4, 0.55, -0.2, 1.8);
+    setTimeout(() => this.bell(7, 0.5, 0.1, 2.0), 120);
+    setTimeout(() => this.bell(11, 0.45, 0.25, 2.4), 260);
+  }
+
   /** The fall: a rising rush of wind, then one deep boom as the screen goes black. */
-  introFall() {
+  holeFall() {
     if (!this.ctx || !this._on) return;
     const ctx = this.ctx;
     const now = ctx.currentTime;
@@ -409,6 +483,7 @@ class SoundEngine {
     o.start(now + 1.0);
     o.stop(now + 2.2);
     // the drone falls away
+    this.holeStop(1.1);
     this.matrixStop(1.1);
   }
 
@@ -518,6 +593,23 @@ class SoundEngine {
     m.o1.stop(end);
     m.o2.stop(end);
     m.src.stop(end);
+  }
+
+  /** Fade the black hole drone out and release it. */
+  holeStop(fade = 0.5) {
+    const h = this.hole;
+    if (!this.ctx || !h) return;
+    this.hole = null;
+    const t = this.ctx.currentTime;
+    h.g.gain.cancelScheduledValues(t);
+    h.g.gain.setTargetAtTime(0.0001, t, fade / 3);
+    h.ng.gain.cancelScheduledValues(t);
+    h.ng.gain.setTargetAtTime(0.0001, t, fade / 3);
+    const end = t + fade + 0.4;
+    h.lfo.stop(end);
+    h.o1.stop(end);
+    h.o2.stop(end);
+    h.src.stop(end);
   }
 
   /** 0..1 loudness for visuals. */

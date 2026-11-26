@@ -440,6 +440,27 @@ button {
   height: 100%;
   display: block;
 }
+/* stand-in when WebGL is unavailable */
+.pre__hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(34vmin, 260px);
+  aspect-ratio: 1;
+  margin: calc(min(34vmin, 260px) / -2) 0 0 calc(min(34vmin, 260px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, #000 52%, transparent 53%),
+    conic-gradient(from 0deg, #fb5e28, #ffe3d2, #5a1d0c, #fb5e28);
+  box-shadow: 0 0 80px 10px rgba(251, 94, 40, 0.35);
+  animation: pre-spin 6s linear infinite;
+  transform: scale(calc(1 + var(--f) * var(--f) * 40));
+}
+@keyframes pre-spin {
+  to {
+    filter: hue-rotate(20deg);
+    rotate: 360deg;
+  }
+}
 .pre__hud,
 .pre__name,
 .pre__meter,
@@ -472,7 +493,7 @@ button {
 .pre__hud--r {
   right: clamp(18px, 3vw, 40px);
 }
-/* the name, shown by the intro when WebGL is unavailable */
+/* the name, pulled toward the hole on the way in */
 .pre__name {
   position: absolute;
   left: 0;
