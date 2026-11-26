@@ -8,6 +8,7 @@ import { sound } from '../lib/audio';
 import { clamp, lerp, smooth, useSound } from '../lib/hooks';
 import { prefersReducedMotion, scrollToTarget, scrollToY } from '../lib/scroll';
 import { TRACK_EVENT, useUI } from '../lib/ui';
+import { useIntroDone } from '../lib/intro';
 
 /**
  * Intro dial → corridor reel.
@@ -231,6 +232,7 @@ const Hero: React.FC = () => {
   const { assets, openViewer } = useUI();
   const soundOn = useSound();
   const reduced = useMemo(() => prefersReducedMotion(), []);
+  const introDone = useIntroDone();
 
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -293,7 +295,8 @@ const Hero: React.FC = () => {
 
   // ---- corridor -----------------------------------------------------------
   useEffect(() => {
-    if (!assets || !glRef.current) return;
+    // the corridor's big texture upload waits for the intro's dark ending, so it never stalls the intro
+    if (!assets || !introDone || !glRef.current) return;
     const stage = stageRef.current!;
     const low = window.innerWidth < 760;
     const c = createCorridor(glRef.current, assets.atlas, assets.cols, assets.rows, assets.tiles, low ? 1.25 : 1.5);
@@ -307,7 +310,7 @@ const Hero: React.FC = () => {
       c.dispose();
       corridorRef.current = null;
     };
-  }, [assets]);
+  }, [assets, introDone]);
 
   // ---- main loop ----------------------------------------------------------
   useEffect(() => {
@@ -336,7 +339,7 @@ const Hero: React.FC = () => {
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      if (!visible || document.hidden) return;
+      if (!visible || document.hidden || document.documentElement.dataset.intro === 'on') return; // stay still under the intro
       const rawDt = (now - last) / 1000;
       const dt = Math.min(0.05, rawDt);
       last = now;

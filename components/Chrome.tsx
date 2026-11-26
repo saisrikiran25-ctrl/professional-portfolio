@@ -5,6 +5,7 @@ import { Arrow } from './Bits';
 import { useMedia, useSound } from '../lib/hooks';
 import { prefersReducedMotion, startScroll, stopScroll } from '../lib/scroll';
 import { MatrixPreloader } from './MatrixPreloader';
+import { setIntroPhase } from '../lib/intro';
 
 /* ------------------------------------------------------------------ */
 /* Preloader — a black hole                                            */
@@ -124,7 +125,7 @@ vec3 trace(vec2 uv, out float bOut){
     float c = 1.0, s = 0.0;
     vec3 prev = gP;
     float prevY = gP.y;
-    for (int i = 0; i < 170; i++){
+    for (int i = 0; i < 150; i++){
       bool near = u > 0.2;                          // finer steps close to the photon sphere
       float dphi = near ? 0.04 : 0.07;
       float cd = near ? cdB : cdA;
@@ -196,7 +197,7 @@ void main(){
   float b0;
   vec3 col = trace(px / H, b0);
   float edge = abs(b0 - 5.196);
-  if (edge < max(0.7, 3.0 * gPx)){
+  if (edge < max(0.45, 2.0 * gPx)){
     for (int k = 0; k < 3; k++){
       vec2 o = k == 0 ? vec2(-0.375, 0.125) : (k == 1 ? vec2(0.125, 0.375) : vec2(0.375, -0.125));
       float bk;
@@ -293,11 +294,14 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
     // smoothly. A governor steps the budget down if frames run slow, and starts lower on
     // modest hardware, so the motion stays fluid.
     const cores = navigator.hardwareConcurrency || 4;
-    let quality = cores >= 8 ? 1 : cores >= 6 ? 0.8 : 0.6;
+    const phone = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
+    // every pixel traces a ray, so the render size is what decides the frame rate
+    const budget = phone ? 380_000 : 900_000;
+    let quality = cores >= 8 ? 1 : cores >= 6 ? 0.85 : 0.7;
     const resize = () => {
       const cw = Math.max(1, cv.clientWidth);
       const ch = Math.max(1, cv.clientHeight);
-      const k = Math.min(1, Math.sqrt((1_600_000 * quality) / (cw * ch)));
+      const k = Math.min(1, Math.sqrt((budget * quality) / (cw * ch)));
       cv.width = Math.max(2, Math.round(cw * k));
       cv.height = Math.max(2, Math.round(ch * k));
       if (gl) gl.viewport(0, 0, cv.width, cv.height);
@@ -324,9 +328,10 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
       raf = requestAnimationFrame(frame);
       const dt = lastNow ? Math.min(0.1, Math.max(0, (now - lastNow) / 1000)) : 0.016;
       lastNow = now;
-      // governor: if the average frame is slower than ~28 fps, shrink the render and look again
-      ema = ema * 0.9 + dt * 0.1;
-      if (linkedOk && pct < 55 && ++nFrames % 30 === 0 && ema > 0.036 && quality > 0.25) {
+      // governor: in the first seconds, while the disk is still faint, step the render size
+      // down until frames hold ~42 fps or better; after that the size never changes again
+      ema = ema * 0.85 + dt * 0.15;
+      if (linkedOk && flareStart < 0 && (now - start) < 2600 && ++nFrames % 15 === 0 && ema > 0.024 && quality > 0.3) {
         quality *= 0.78;
         resize();
       }
@@ -393,6 +398,7 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
       }
       if (!leavingSet && flareStart >= 0 && (fall >= 0.92 || (reduced && now - flareStart > 500))) {
         leavingSet = true;
+        setIntroPhase('ending'); // the screen is dark now: the page may wake up behind it
         setLeaving(true);
       }
     };
@@ -409,6 +415,14 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
     const t = setTimeout(() => setGone(true), 1100);
     return () => clearTimeout(t);
   }, [leaving]);
+
+  useEffect(() => {
+    if (gone) setIntroPhase('off');
+  }, [gone]);
+  useEffect(() => {
+    setIntroPhase('on');
+    return () => setIntroPhase('off');
+  }, []);
 
   if (gone) return null;
   const letters = NAME.split('');

@@ -3,6 +3,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { sound } from '../lib/audio';
 import { useSound } from '../lib/hooks';
 import { prefersReducedMotion } from '../lib/scroll';
+import { setIntroPhase } from '../lib/intro';
 
 /* ------------------------------------------------------------------ */
 /* Preloader, variant two: digital rain                                */
@@ -248,11 +249,13 @@ export const MatrixPreloader: React.FC<{ done: boolean }> = ({ done }) => {
 
     // render at a pixel budget (the browser scales it up); a governor steps it down if slow
     const cores = navigator.hardwareConcurrency || 4;
-    let quality = cores >= 8 ? 1 : cores >= 6 ? 0.85 : 0.65;
+    const phone = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
+    const budget = phone ? 600_000 : 1_500_000;
+    let quality = cores >= 8 ? 1 : cores >= 6 ? 0.85 : 0.7;
     const resize = () => {
       const cw = Math.max(1, cv.clientWidth);
       const ch = Math.max(1, cv.clientHeight);
-      const k = Math.min(1, Math.sqrt((2_400_000 * quality) / (cw * ch)));
+      const k = Math.min(1, Math.sqrt((budget * quality) / (cw * ch)));
       cv.width = Math.max(2, Math.round(cw * k));
       cv.height = Math.max(2, Math.round(ch * k));
       if (gl) gl.viewport(0, 0, cv.width, cv.height);
@@ -281,8 +284,8 @@ export const MatrixPreloader: React.FC<{ done: boolean }> = ({ done }) => {
       raf = requestAnimationFrame(frame);
       const dt = lastNow ? Math.min(0.1, Math.max(0, (now - lastNow) / 1000)) : 0.016;
       lastNow = now;
-      ema = ema * 0.9 + dt * 0.1;
-      if (linkedOk && pct < 55 && ++nFrames % 30 === 0 && ema > 0.036 && quality > 0.25) {
+      ema = ema * 0.85 + dt * 0.15;
+      if (linkedOk && lockStart < 0 && now - start < 2600 && ++nFrames % 15 === 0 && ema > 0.024 && quality > 0.3) {
         quality *= 0.78;
         resize();
       }
@@ -350,6 +353,7 @@ export const MatrixPreloader: React.FC<{ done: boolean }> = ({ done }) => {
       }
       if (!leavingSet && lockStart >= 0 && (fall >= 0.92 || (reduced && now - lockStart > 700))) {
         leavingSet = true;
+        setIntroPhase('ending'); // the screen is dark now: the page may wake up behind it
         setLeaving(true);
       }
     };
@@ -366,6 +370,14 @@ export const MatrixPreloader: React.FC<{ done: boolean }> = ({ done }) => {
     const t = setTimeout(() => setGone(true), 1100);
     return () => clearTimeout(t);
   }, [leaving]);
+
+  useEffect(() => {
+    if (gone) setIntroPhase('off');
+  }, [gone]);
+  useEffect(() => {
+    setIntroPhase('on');
+    return () => setIntroPhase('off');
+  }, []);
 
   if (gone) return null;
   const letters = NAME.split('');

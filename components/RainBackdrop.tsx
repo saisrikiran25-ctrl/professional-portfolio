@@ -35,7 +35,7 @@ const RainBackdrop: React.FC = () => {
     let last = 0;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      if (document.hidden || now - last < 42) return;
+      if (document.hidden || document.documentElement.dataset.intro || now - last < 42) return;
       last = now;
       // fade the old frame out so each drop leaves a trail
       ctx.globalCompositeOperation = 'destination-out';

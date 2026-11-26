@@ -52,8 +52,13 @@ export function loadThumbs(items: Item[]): Promise<void> {
           const img = new Image();
           img.decoding = 'async';
           img.onload = () => {
-            THUMBS.set(i.id, img);
-            resolve();
+            // decode off the main thread now, so drawing it later never stalls a frame
+            const ready = () => {
+              THUMBS.set(i.id, img);
+              resolve();
+            };
+            if (typeof img.decode === 'function') img.decode().then(ready, ready);
+            else ready();
           };
           img.onerror = () => resolve(); // fall back to the generated art
           img.src = i.thumb!;

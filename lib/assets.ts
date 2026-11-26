@@ -29,9 +29,13 @@ export function loadAssets(): Promise<Assets> {
 
     await loadThumbs(ITEMS);
 
+    // built a piece at a time, yielding between pieces, so the intro keeps animating smoothly
+    const breathe = () => new Promise<void>((r) => setTimeout(r, 0));
     const arts = new Map<string, HTMLCanvasElement>();
-    for (const it of ITEMS) arts.set(it.id, makeArtCanvas(it, 2));
-    for (const it of SECTION_ART) arts.set(it.id, makeArtCanvas(it, 2));
+    for (const it of [...ITEMS, ...SECTION_ART]) {
+      arts.set(it.id, makeArtCanvas(it, 2));
+      await breathe();
+    }
 
     const cols = 5;
     const rows = Math.ceil(ITEMS.length / cols);
@@ -45,7 +49,8 @@ export function loadAssets(): Promise<Assets> {
     const ctx = atlas.getContext('2d')!;
     ctx.fillStyle = '#090c12';
     ctx.fillRect(0, 0, atlas.width, atlas.height);
-    ITEMS.forEach((it, i) => {
+    for (let i = 0; i < ITEMS.length; i++) {
+      const it = ITEMS[i];
       ctx.save();
       ctx.translate((i % cols) * TW, Math.floor(i / cols) * TH);
       ctx.beginPath();
@@ -53,7 +58,8 @@ export function loadAssets(): Promise<Assets> {
       ctx.clip();
       drawCardArt(ctx, it, TW / CARD_W, CARD_W, CARD_H, 70, true);
       ctx.restore();
-    });
+      await breathe();
+    }
 
     return { arts, atlas, cols, rows, tiles: ITEMS.length };
   })();
