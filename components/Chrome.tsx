@@ -322,7 +322,7 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      const dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0.016;
+      const dt = lastNow ? Math.min(0.1, Math.max(0, (now - lastNow) / 1000)) : 0.016;
       lastNow = now;
       // governor: if the average frame is slower than ~28 fps, shrink the render and look again
       ema = ema * 0.9 + dt * 0.1;
@@ -332,7 +332,7 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
       }
       if (gl && par && !linkedOk && !failed && gl.getProgramParameter(prog!, par.COMPLETION_STATUS_KHR)) finishSetup();
 
-      const t = (now - start) / 1000;
+      const t = Math.max(0, (now - start) / 1000);
       // Progress is a smooth, continuous motion: it drifts toward ~88% while loading, then once
       // everything is ready it swells to 100%. Its speed eases up and down (never jumps), and it
       // is stepped by real time, so it looks the same at any refresh rate.
@@ -340,7 +340,8 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
       const target = ready ? 100 : Math.min(88, 6 + t * 28);
       const want = Math.min(ready ? 62 : 38, Math.max(0, target - pct) * (ready ? 3.2 : 2.2));
       vel += (want - vel) * (1 - Math.exp(-dt * 4.5));
-      pct = Math.min(target, pct + vel * dt);
+      vel = Math.max(0, vel); // progress only ever moves forward
+      pct = Math.min(100, Math.max(0, Math.min(target, pct + vel * dt)));
       if (ready && pct > 99.3) pct = 100;
       if (reduced) pct = ready ? 100 : Math.min(88, pct);
 
@@ -380,8 +381,8 @@ const BlackHolePreloader: React.FC<{ done: boolean }> = ({ done }) => {
       root.style.setProperty('--f', fall.toFixed(4));
       root.style.setProperty('--p', (pct / 100).toFixed(4));
 
-      if (numRef.current) numRef.current.textContent = String(Math.floor(pct));
-      if (barRef.current) barRef.current.style.transform = `scaleX(${pct / 100})`;
+      if (numRef.current) numRef.current.textContent = String(Math.min(100, Math.max(0, Math.floor(pct))));
+      if (barRef.current) barRef.current.style.transform = `scaleX(${Math.min(1, Math.max(0, pct / 100))})`;
       if (labelRef.current) {
         let l = PRE_LABELS[0][1];
         for (const [from, text] of PRE_LABELS) if (pct >= from) l = text;
