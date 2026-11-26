@@ -263,7 +263,8 @@ export class WordMark {
     this.w = w;
     this.h = h;
     this.dpr = dpr;
-    this.cell = clamp(Math.round(w / 120), 6, 12);
+    // finer dots on phones so the name stays legible
+    this.cell = w < 560 ? 4 : clamp(Math.round(w / 120), 6, 12);
     this.cols = Math.floor(w / this.cell);
     this.rows = Math.floor(h / this.cell);
     const m = document.createElement('canvas');
@@ -275,9 +276,9 @@ export class WordMark {
     c.fillStyle = '#fff';
     c.textBaseline = 'alphabetic';
     c.textAlign = 'left';
-    // narrow screens: stack the name on two lines so it stays legible
     const words = this.text.split(' ');
-    const lines = w < 560 && words.length > 1 ? [words.slice(0, -2).join(' ') || words[0], words.slice(-2).join(' ')] : [this.text];
+    // phones: one word per line, so each letter gets enough dots to read
+    const lines = w < 560 && words.length > 1 ? words : [this.text];
     const target = this.cols * 0.96;
     let size = (this.rows / lines.length) * 0.74;
     for (const line of lines) {

@@ -2012,7 +2012,7 @@ button {
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
 }
-.fact span {
+.fact > span {
   display: block;
   margin-top: 12px;
   font: 700 10.5px var(--f-body);
@@ -3636,5 +3636,135 @@ button {
   }
   .marquee__track {
     animation: none;
+  }
+}
+
+/* =====================================================================
+   Phones: one consistent layout, nothing overlapping
+   ===================================================================== */
+@media (max-width: 760px) {
+  /* the sound toggle and the Connect button live in one solid bottom bar, and the page leaves
+     room for it, so they never sit on top of content */
+  .dock {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(68px + env(safe-area-inset-bottom, 0px));
+    padding: 0 var(--m) env(safe-area-inset-bottom, 0px);
+    display: flex;
+    align-items: center;
+    background: rgba(9, 12, 18, 0.92);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 -1px 0 var(--line);
+  }
+  .dock__sound {
+    height: 44px;
+  }
+  .float-cta {
+    z-index: 96;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+  body:has(.menu.is-open) .dock,
+  body:has(.menu.is-open) .float-cta {
+    visibility: hidden;
+  }
+  .reel__dots {
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  }
+  /* the big year behind the timeline collides with the cards on narrow screens; each card
+     already shows its year */
+  .tl__year {
+    display: none;
+  }
+  /* the About buttons share one width */
+  .intro__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .intro__actions > * {
+    justify-content: center;
+    width: 100%;
+  }
+  /* the portrait caption wraps instead of being cut off */
+  .portrait__bar .chip {
+    flex-wrap: wrap;
+    row-gap: 2px;
+    white-space: normal;
+  }
+  .portrait__bar .chip i {
+    overflow: visible;
+  }
+  /* contact choices: one even column */
+  .chips {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .chipbtn {
+    width: 100%;
+  }
+}
+@media (max-width: 640px) {
+  /* both corner labels in the hero, balanced */
+  .hud__tl {
+    display: block;
+  }
+  .hud__tl span {
+    display: none;
+  }
+  .hud__tl b,
+  .hud__tr b {
+    font-size: 8.5px;
+  }
+}
+@media (max-width: 560px) {
+  .reel__card {
+    width: min(560px, 86vw);
+  }
+  .wordmark canvas {
+    height: clamp(230px, 74vw, 330px);
+  }
+}
+/* touch screens have no ⌘K */
+@media (pointer: coarse) {
+  .float-cta__k {
+    display: none;
+  }
+}
+/* landscape phones: the same bottom bar, slimmer, and it slides away while the Connect button is
+   hidden (over the hero and at the contact form) so the short screen stays clear */
+@media (max-height: 500px) and (orientation: landscape) {
+  .dock {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding: 0 var(--m) env(safe-area-inset-bottom, 0px);
+    display: flex;
+    align-items: center;
+    background: rgba(9, 12, 18, 0.92);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 -1px 0 var(--line);
+    transition: transform 0.5s var(--ease-out);
+  }
+  body:not(:has(.float-cta.is-in)) .dock {
+    transform: translateY(110%);
+  }
+  .dock__sound {
+    height: 40px;
+  }
+  .float-cta {
+    z-index: 96;
+    bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .float-cta__main {
+    height: 44px;
+  }
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   }
 }
