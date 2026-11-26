@@ -127,7 +127,7 @@ const Work: React.FC = () => {
         <div ref={introRef} className="work__intro reveal">
           <Eyebrow>02 — System Curriculum</Eyebrow>
           <h2 className="display"><Split>
-            FOUR TRACKS.
+            SIX TRACKS.
             <br />
             <span className="thin">ONE STANDARD:</span>
             <br />
