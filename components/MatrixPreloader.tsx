@@ -331,7 +331,7 @@ export const MatrixPreloader: React.FC<{ done: boolean }> = ({ done }) => {
         }
         if (fall > 0 && !fell) {
           fell = true;
-          sound.holeFall();
+          sound.introFall();
         }
       }
       root.style.setProperty('--f', fall.toFixed(4));

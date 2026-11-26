@@ -472,7 +472,7 @@ button {
 .pre__hud--r {
   right: clamp(18px, 3vw, 40px);
 }
-/* the name, pulled toward the hole on the way in */
+/* the name, shown by the intro when WebGL is unavailable */
 .pre__name {
   position: absolute;
   left: 0;
